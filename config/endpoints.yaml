@@ -1,0 +1,260 @@
+openapi: 3.1.0
+info:
+  title: Parking OS
+  version: 1.0.0
+
+servers:
+  - url: https://parking-os-backend.onrender.com/
+paths:
+  /admin/users:
+    get:
+      tags:
+        - users
+        - admin
+      summary: Get info on all users
+      description: Provides array with all registered users
+      operationId: adminGetUsers
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - users
+        - admin
+        - development
+      summary: Add a new user
+      description: Add a new user (development only)
+      operationId: addUser
+      requestBody:
+        description: Create a new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid input
+  /admin/users/{userId}:
+    get:
+      tags:
+        - users
+        - vehicles
+        - admin
+      summary: Get users cars
+      description: Provides array with all of selected users cars
+      operationId: adminGetUsersCars
+      parameters:
+        - name: userId
+          in: path
+          description: Primary key for users table
+          required: true
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+  /admin/tickets/{userId}:
+    get:
+      tags:
+        - admin
+        - users
+        - tickets
+      summary: Get all of users tickets
+      description: Provides array with all of users tickets
+      operationId: usersTickets
+      parameters:
+        - name: userId
+          in: path
+          description: Primary key for users table
+          required: true
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+        '400':
+          description: Invalid user id
+  /admin/tickets:
+    post:
+      tags:
+        - admin
+        - tickets
+        - development
+      summary: Add a new ticket
+      description: Add a new ticket (development only)
+      operationId: addTicket
+      requestBody:
+        description: Create a new ticket
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ticket'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid input
+  /admin/parking-lots:
+    get:
+      tags:
+        - admin
+        - parking lots
+      summary: Get all parking lots
+      description: Provides array with all parking lots
+      operationId: getParkingLots
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingLot'
+    post:
+      tags:
+        - admin
+        - parking lots
+      summary: Add a new parking lot
+      description: Add a new parking lot
+      operationId: addParkingLot
+      requestBody:
+        description: Create a new parking lot
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingLot'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid input
+
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Primary key
+        name:
+          type: string
+          description: User's name
+        surname:
+          type: string
+          description: User's surname
+        accountBalance:
+          type: number
+          format: float
+          description: Amount of money in PLN
+        blocked:
+          type: boolean
+          description: Status of user
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Primary key
+        userId:
+          type: integer
+          description: User table foregin key
+        vehicleLicenceNumber:
+          type: string
+          description: Vehicle table foregin key
+        parkingSpaceId:
+          type: integer
+          description: Parking space foregin key
+        issueTimestamp:
+          type: integer
+          format: timestamp
+          description: Start time of parking
+        endTimestamp:
+          type: integer
+          format: timestamp
+          description: End time of parking
+        amountPaid:
+          type: number
+          format: float
+          description: Amount of money in PLN
+    ParkingLot:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Primary key
+        costElectricity:
+          type: number
+          format: float
+          description: Amount of money in PLN
+        costCleaning:
+          type: number
+          format: float
+          description: Amount of money in PLN
+        costSecurity:
+          type: number
+          format: float
+          description: Amount of money in PLN
+        city:
+          type: string
+          description: City where the parking lot is located
+        address:
+          type: string
+          description: Address where the parking lot is located
+          examples: ['Zielona 19']
+        latitude:
+          type: number
+          description: Latitude of the parking lots location
+        longitude:
+          type: number
+          description: Longitude of the parking lots location
+    Vehicle:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: User table foregin key
+        type:
+          type: string
+          description: Type of car
+          enum:
+            - CAR
+            - TRUCK
+        brand:
+          type: string
+          description: Brand of car
+        model:
+          type: string
+          description: Model of car
+        licencePlateNumber:
+          type: string
+          description: Primary key
+                    
+
