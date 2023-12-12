@@ -22,7 +22,7 @@ async fn main() {
         .route("/", get(root))
         .route("/users", post(create_user));
 
-    let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 3000));
     tracing::debug!("Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
