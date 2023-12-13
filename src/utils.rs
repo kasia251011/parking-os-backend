@@ -28,3 +28,20 @@ pub async fn check_mongodb_connection(client: &Client) -> mongodb::error::Result
     println!("Pinged your deployment. You successfully connected to MongoDB!");
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_mongodb_connection() {
+        dotenv::from_filename(".env").ok();
+
+        let config = load_config().expect("Failed to load config");
+
+        let client = setup_mongodb(&config.mongodb_host).await.expect("Failed to connect to MongoDB");
+
+        let result = check_mongodb_connection(&client).await;
+        assert!(result.is_ok(), "Failed to ping MongoDB: {:?}", result);
+    }
+}

@@ -1,7 +1,4 @@
-use axum::{
-    routing::{get, post},
-    Router,
-};
+use axum::{Router, routing::{get, post}};
 use dotenv::dotenv;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -23,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let client = utils::setup_mongodb(&config.mongodb_host).await?;
     utils::check_mongodb_connection(&client).await?;
 
-    let app = Router::new().route("/", get(users::root)).route("/users", post(users::create_user));
+    let app = app();
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 3000));
     tracing::debug!("Listening on {}", addr);
@@ -32,4 +29,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
+}
+
+fn app() -> Router {
+    Router::new()
+    .route("/", get(users::root))
+    .route("/users", post(users::create_user))
 }
