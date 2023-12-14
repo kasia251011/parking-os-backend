@@ -2,11 +2,12 @@ openapi: 3.1.0
 info:
   title: Parking OS
   version: 1.0.0
+  description: According to https://www.mongodb.com/docs/manual/reference/method/ObjectId/ an ObjectID can include letters and as such was declared as string
 
 servers:
   - url: https://parking-os-backend.onrender.com/
 paths:
-  /admin/users:
+  /users:
     get:
       tags:
         - users
@@ -43,15 +44,15 @@ paths:
           description: Successful operation
         '400':
           description: Invalid input
-  /admin/users/{userId}:
+  /vehicles/{userId}:
     get:
       tags:
         - users
         - vehicles
         - admin
-      summary: Get users cars
-      description: Provides array with all of selected users cars
-      operationId: adminGetUsersCars
+      summary: Get users vehicles
+      description: Provides array with all of selected users vehicles
+      operationId: adminGetUsersVehicles
       parameters:
         - name: userId
           in: path
@@ -69,7 +70,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Vehicle'
-  /admin/tickets/{userId}:
+        '400':
+          description: Invalid user id
+  /vehicles:
+    get:
+      tags:
+        - vehicles
+        - admin
+      summary: Get all vehicles
+      description: Provides array with all registered vehicles
+      operationId: adminGetVehicles
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+  /tickets/{userId}:
     get:
       tags:
         - admin
@@ -97,7 +117,7 @@ paths:
                   $ref: '#/components/schemas/Ticket'
         '400':
           description: Invalid user id
-  /admin/tickets:
+  /tickets:
     post:
       tags:
         - admin
@@ -118,7 +138,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid input
-  /admin/parking-lots:
+  /parking-lots:
     get:
       tags:
         - admin
@@ -155,14 +175,13 @@ paths:
         '400':
           description: Invalid input
 
-
 components:
   schemas:
     User:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Primary key
         name:
           type: string
@@ -181,16 +200,16 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Primary key
         userId:
-          type: integer
+          type: string
           description: User table foregin key
         vehicleLicenceNumber:
           type: string
           description: Vehicle table foregin key
         parkingSpaceId:
-          type: integer
+          type: string
           description: Parking space foregin key
         issueTimestamp:
           type: integer
@@ -208,7 +227,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Primary key
         costElectricity:
           type: number
@@ -239,20 +258,20 @@ components:
       type: object
       properties:
         userId:
-          type: integer
+          type: string
           description: User table foregin key
         type:
           type: string
-          description: Type of car
+          description: Type of vehicle
           enum:
             - CAR
             - TRUCK
         brand:
           type: string
-          description: Brand of car
+          description: Brand of vehicle
         model:
           type: string
-          description: Model of car
+          description: Model of vehicle
         licencePlateNumber:
           type: string
           description: Primary key
