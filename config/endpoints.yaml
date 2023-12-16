@@ -45,7 +45,7 @@ paths:
     get:
       tags:
         - vehicles
-      summary: Get users vehicles
+      summary: Get all of users vehicles
       description: Provides array with all of selected users vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: adminGetUsersVehicles
       parameters:
@@ -217,31 +217,39 @@ components:
         id:
           type: string
           description: Primary key
-        costElectricity:
-          type: number
-          format: float
-          description: Amount of money in PLN
-        costCleaning:
-          type: number
-          format: float
-          description: Amount of money in PLN
-        costSecurity:
-          type: number
-          format: float
-          description: Amount of money in PLN
-        city:
-          type: string
-          description: City where the parking lot is located
-        address:
-          type: string
-          description: Address where the parking lot is located
-          examples: ['Zielona 19']
-        latitude:
-          type: number
-          description: Latitude of the parking lots location
-        longitude:
-          type: number
-          description: Longitude of the parking lots location
+        costOfMaintenance:
+          type: object
+          description: variables for calculating operating costs of the parking lot
+          properties:
+            electricity:
+              type: number
+              format: float
+              description: Amount of money in PLN
+            cleaning:
+              type: number
+              format: float
+              description: Amount of money in PLN
+            security:
+              type: number
+              format: float
+              description: Amount of money in PLN
+        location:
+          type: object
+          description: variables for determining the location of the parking lot
+          properties:
+            city:
+              type: string
+              description: City where the parking lot is located
+            address:
+              type: string
+              description: Address where the parking lot is located
+              examples: ['Zielona 19']
+            latitude:
+              type: number
+              description: Latitude of the parking lots location
+            longitude:
+              type: number
+              description: Longitude of the parking lots location
     Vehicle:
       type: object
       properties:
