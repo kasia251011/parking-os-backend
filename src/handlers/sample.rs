@@ -6,7 +6,7 @@ pub async fn root() -> &'static str {
     "Hello, World!"
 }
 
-pub async fn create_user(
+pub async fn create_sample_user(
     Json(payload): Json<CreateUser>,
 ) -> impl IntoResponse {
     let user = User {

@@ -3,8 +3,7 @@ use mongodb::bson::oid::ObjectId;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
-    #[serde(rename = "_id")]
-    pub id: ObjectId,
+    pub _id: ObjectId,
     pub name: String,
     pub surname: String,
     pub account_balance: f64,

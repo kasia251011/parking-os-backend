@@ -3,7 +3,8 @@ mod handlers;
 
 use std::{time::Duration, sync::Arc};
 use axum::{
-    http::{header, HeaderValue},
+    http::{header, HeaderValue, Method,
+            header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},},
     routing::{get, post},
     Router,
 };
@@ -12,14 +13,15 @@ use tower_http::{
     limit::RequestBodyLimitLayer,
     set_header::SetResponseHeaderLayer,
     trace::TraceLayer,
-    timeout::TimeoutLayer
+    timeout::TimeoutLayer,
+    cors::CorsLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use handlers::{
     common::handler_404,
-    sample::{create_user, root},
-    admin::users::*,
+    sample::{create_sample_user, root},
+    admin::users::{create_user, get_users},
 };
 use structs::db::DB;
 
@@ -42,7 +44,14 @@ async fn main() {
         .init();
 
     let db = DB::new().await.unwrap();
-    let app = app(Arc::new(AppState { db: db.clone() })).await;
+
+    let cors = CorsLayer::new()
+        .allow_origin("http://0.0.0.0:3000".parse::<HeaderValue>().unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE])
+        .allow_credentials(true)
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
+
+    let app = app(Arc::new(AppState { db: db.clone() })).await.layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -51,8 +60,9 @@ async fn main() {
 pub async fn app(app_state: Arc<AppState>) -> Router {
     let app = Router::new()
         .route("/sample/", get(root))
-        .route("/sample/users/", post(create_user))
+        .route("/sample/users/", post(create_sample_user))
         .route("/users", get(get_users))
+        .route("/users", post(create_user))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))

@@ -1,8 +1,14 @@
 use std::time::Duration;
+use bson::oid::ObjectId;
 use futures::StreamExt;
 use mongodb::{options::{Compressor, ClientOptions}, Collection, Client};
 
-use super::{error::MyError::{*, self}, model::{ParkingLot, Ticket, User, Vehicle}, response::{UserListResponse, UserResponse}};
+use super::{
+    error::MyError::{*, self}, 
+    model::{ParkingLot, Ticket, User, Vehicle}, 
+    response::{UserListResponse, UserResponse, GenericResponse}, 
+    schema::CreateUserSchema
+};
 
 #[derive(Clone, Debug)]
 pub struct DB {
@@ -85,9 +91,36 @@ impl DB {
         })
     }
 
+    pub async fn create_user(&self, body: &CreateUserSchema) -> Result<GenericResponse> {
+        let user = User {
+            _id: ObjectId::new(),
+            name: body.name.to_owned(),
+            surname: body.surname.to_owned(),
+            account_balance: body.account_balance,
+            blocked: body.blocked,
+        };
+
+        match self.user_collection.insert_one(user, None).await {
+            Ok(result) => result,
+            Err(e) => {
+                if e.to_string()
+                    .contains("E110000 duplicate key error collection")
+                {
+                    return Err(MongoDuplicateError(e));
+                }
+                return Err(MongoQueryError(e));
+            }
+        };
+
+        Ok(GenericResponse {
+            status: "200".to_string(),
+            message: "Successful operation".to_string(),
+        })
+    }
+    
     fn doc_to_user(&self, user: &User) -> Result<UserResponse> {
         let user_response = UserResponse {
-            id: user.id.to_hex(),
+            id: user._id.to_hex(),
             name: user.name.to_owned(),
             surname: user.surname.to_owned(),
             account_balance: user.account_balance.to_owned(),

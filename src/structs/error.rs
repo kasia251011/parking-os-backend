@@ -13,6 +13,8 @@ pub enum MyError {
     MongoQueryError(mongodb::error::Error),
     #[error("error serializing BSON")]
     MongoSerializeBsonError(#[from] mongodb::bson::ser::Error),
+    #[error("error deserializing BSON")]
+    MongoDeserializeBsonError(#[from] mongodb::bson::de::Error),
     #[error("validation error")]
     MongoDataError(#[from] mongodb::bson::document::ValueAccessError),
     #[error("invalid ID: {0}")]
@@ -73,6 +75,13 @@ impl Into<(axum::http::StatusCode, Json<serde_json::Value>)> for MyError {
                 },
             ),
             MyError::MongoSerializeBsonError(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("MongoDB error: {}", e),
+                },
+            ),
+            MyError::MongoDeserializeBsonError(e) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 ErrorResponse {
                     status: "400",
