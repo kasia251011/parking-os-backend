@@ -1,5 +1,6 @@
 mod structs;
 mod handlers;
+mod db;
 
 use std::{time::Duration, sync::Arc};
 use axum::{
@@ -23,7 +24,7 @@ use handlers::{
     sample::{create_sample_user, root},
     admin::users::{create_user, get_users},
 };
-use structs::db::DB;
+use db::common::DB;
 
 pub struct AppState {
     db: DB,
