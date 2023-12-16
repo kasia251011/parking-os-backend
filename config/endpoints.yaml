@@ -11,9 +11,8 @@ paths:
     get:
       tags:
         - users
-        - admin
       summary: Get info on all users
-      description: Provides array with all registered users
+      description: Provides array with all registered users <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: adminGetUsers
       responses:
         '200':
@@ -27,10 +26,8 @@ paths:
     post:
       tags:
         - users
-        - admin
-        - development
       summary: Add a new user
-      description: Add a new user (development only)
+      description: Add a new user (development only) <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: addUser
       requestBody:
         description: Create a new user
@@ -47,11 +44,9 @@ paths:
   /vehicles/{userId}:
     get:
       tags:
-        - users
         - vehicles
-        - admin
       summary: Get users vehicles
-      description: Provides array with all of selected users vehicles
+      description: Provides array with all of selected users vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: adminGetUsersVehicles
       parameters:
         - name: userId
@@ -76,9 +71,8 @@ paths:
     get:
       tags:
         - vehicles
-        - admin
       summary: Get all vehicles
-      description: Provides array with all registered vehicles
+      description: Provides array with all registered vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: adminGetVehicles
       responses:
         '200':
@@ -92,11 +86,9 @@ paths:
   /tickets/{userId}:
     get:
       tags:
-        - admin
-        - users
         - tickets
       summary: Get all of users tickets
-      description: Provides array with all of users tickets
+      description: Provides array with all of users tickets <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: usersTickets
       parameters:
         - name: userId
@@ -120,11 +112,9 @@ paths:
   /tickets:
     post:
       tags:
-        - admin
         - tickets
-        - development
       summary: Add a new ticket
-      description: Add a new ticket (development only)
+      description: Add a new ticket (development only) <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: addTicket
       requestBody:
         description: Create a new ticket
@@ -141,10 +131,9 @@ paths:
   /parking-lots:
     get:
       tags:
-        - admin
         - parking lots
       summary: Get all parking lots
-      description: Provides array with all parking lots
+      description: Provides array with all parking lots <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: getParkingLots
       responses:
         '200':
@@ -157,10 +146,9 @@ paths:
                   $ref: '#/components/schemas/ParkingLot'
     post:
       tags:
-        - admin
         - parking lots
       summary: Add a new parking lot
-      description: Add a new parking lot
+      description: Add a new parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: addParkingLot
       requestBody:
         description: Create a new parking lot
