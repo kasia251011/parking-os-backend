@@ -21,6 +21,7 @@ dotenv = "0.15.0"
 serde_with = "3.4.0"
 mime = "0.3.17"
 http-body-util = "0.1.0"
+thiserror = "1.0.40"
 
 [dev-dependencies]
 tower = { version = "0.4.13", features = ["util"] }

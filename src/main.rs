@@ -1,18 +1,13 @@
 mod structs;
 mod handlers;
 
-use std::time::Duration;
+use std::{time::Duration, sync::Arc};
 use axum::{
     http::{header, HeaderValue},
     routing::{get, post},
     Router,
 };
 use dotenv::dotenv;
-use mongodb::{
-    bson::doc,
-    options::ClientOptions,
-    Client,
-};
 use tower_http::{
     limit::RequestBodyLimitLayer,
     set_header::SetResponseHeaderLayer,
@@ -24,8 +19,13 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use handlers::{
     common::handler_404,
     sample::{create_user, root},
+    admin::users::*,
 };
-use structs::common::DatabaseConfig;
+use structs::db::DB;
+
+pub struct AppState {
+    db: DB,
+}
 
 #[tokio::main]
 async fn main() {
@@ -41,16 +41,18 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let app = app().await;
+    let db = DB::new().await.unwrap();
+    let app = app(Arc::new(AppState { db: db.clone() })).await;
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-pub async fn app() -> Router {
+pub async fn app(app_state: Arc<AppState>) -> Router {
     let app = Router::new()
         .route("/sample/", get(root))
         .route("/sample/users/", post(create_user))
+        .route("/users", get(get_users))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))
@@ -60,27 +62,7 @@ pub async fn app() -> Router {
             HeaderValue::from_static("rust-axum"),
     ));
 
-    let client = setup_mongodb().await;
-    app.fallback(handler_404).with_state(client)
-}
-
-pub async fn setup_mongodb() -> Client {
-    let database_config = DatabaseConfig::new();
-    let mut client_options = ClientOptions::parse(database_config.uri).await.unwrap();
-    client_options.connect_timeout = database_config.connection_timeout;
-    client_options.max_pool_size = database_config.max_pool_size;
-    client_options.min_pool_size = database_config.min_pool_size;
-    // the server will select the algorithm it supports from the list provided by the driver
-    client_options.compressors = database_config.compressors;
-
-    Client::with_options(client_options).unwrap()
-}
-
-pub async fn check_mongodb_connection(client: &Client) -> mongodb::error::Result<()> {
-    let database = client.database("parking-os");
-    database.run_command(doc! {"ping": 1}, None).await?;
-    println!("Pinged your deployment. You successfully connected to MongoDB!");
-    Ok(())
+    app.fallback(handler_404).with_state(app_state)
 }
 
 #[cfg(test)]
@@ -97,18 +79,11 @@ mod tests {
     use tower::{Service, ServiceExt}; // for `call`, `oneshot`, and `ready`
 
     #[tokio::test]
-    async fn test_mongodb_connection() {
-        dotenv().ok();
-        let client = setup_mongodb().await;
-
-        let result = check_mongodb_connection(&client).await;
-        assert!(result.is_ok(), "Failed to ping MongoDB: {:?}", result);
-    }
-
-    #[tokio::test]
     async fn hello_world() {
         dotenv().ok();
-        let app = app().await;
+
+        let db = DB::new().await.unwrap();
+        let app = app(Arc::new(AppState { db: db.clone() })).await;
 
         let response = app
             .oneshot(Request::builder().uri("/sample/").body(Body::empty()).unwrap())
@@ -124,7 +99,9 @@ mod tests {
     #[tokio::test]
     async fn json() {
         dotenv().ok();
-        let app = app().await;
+
+        let db = DB::new().await.unwrap();
+        let app = app(Arc::new(AppState { db: db.clone() })).await;
 
         let response = app
             .oneshot(
@@ -155,7 +132,9 @@ mod tests {
     #[tokio::test]
     async fn not_found() {
         dotenv().ok();
-        let app = app().await;
+
+        let db = DB::new().await.unwrap();
+        let app = app(Arc::new(AppState { db: db.clone() })).await;
 
         let response = app
             .oneshot(
@@ -175,7 +154,10 @@ mod tests {
 
     #[tokio::test]
     async fn multiple_request() {
-        let mut app = app().await.into_service();
+        dotenv().ok();
+
+        let db = DB::new().await.unwrap();
+        let mut app = app(Arc::new(AppState { db: db.clone() })).await.into_service();
 
         let request = Request::builder().uri("/sample/").body(Body::empty()).unwrap();
         let response = ServiceExt::<Request<Body>>::ready(&mut app)
