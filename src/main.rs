@@ -23,6 +23,7 @@ use handlers::{
     common::handler_404,
     sample::{create_sample_user, root},
     admin::users::{create_user, get_users},
+    admin::parking_lot::{create_parking, get_parkings},
 };
 use db::common::DB;
 
@@ -64,6 +65,8 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/sample/users/", post(create_sample_user))
         .route("/users", get(get_users))
         .route("/users", post(create_user))
+        .route("/parking-lots", get(get_parkings))
+        .route("/parking-lots", post(create_parking))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))

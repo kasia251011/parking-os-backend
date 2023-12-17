@@ -12,8 +12,7 @@ pub struct User {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Ticket {
-    #[serde(rename = "_id")]
-    pub id: ObjectId,
+    pub _id: ObjectId,
     pub user_id: String,
     pub vehicle_license_number: String,
     pub parking_space_id: String,
@@ -24,11 +23,20 @@ pub struct Ticket {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ParkingLot {
-    #[serde(rename = "_id")]
-    pub id: ObjectId,
-    pub cost_electricity: f64,
-    pub cost_cleaning: f64,
-    pub cost_security: f64,
+    pub _id: ObjectId,
+    pub cost_of_maintenance: CostOfMaintenance,
+    pub location: Location,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CostOfMaintenance {
+    pub electricity: f64,
+    pub cleaning: f64,
+    pub security: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Location {
     pub city: String,
     pub address: String,
     pub latitude: f64,
@@ -37,8 +45,7 @@ pub struct ParkingLot {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Vehicle {
-    #[serde(rename = "_id")]
-    pub id: ObjectId,
+    pub _id: ObjectId,
     pub user_id: String,
     pub r#type: String,
     pub brand: String,

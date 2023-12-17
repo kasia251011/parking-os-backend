@@ -2,7 +2,7 @@ use std::time::Duration;
 use mongodb::{options::{Compressor, ClientOptions}, Collection, Client};
 
 use crate::structs::{
-    error::MyError::{*, self}, 
+    error::MyError, 
     model::{ParkingLot, Ticket, User, Vehicle}, 
 };
 

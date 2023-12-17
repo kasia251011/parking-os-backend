@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use super::model::{CostOfMaintenance, Location};
+
 #[derive(Serialize)]
 pub struct GenericResponse {
     pub status: String,
@@ -19,4 +21,17 @@ pub struct UserResponse {
 pub struct UserListResponse {
     pub status: &'static str,
     pub users: Vec<UserResponse>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct ParkingLotResponse {
+    pub id: String,
+    pub cost_of_maintance: CostOfMaintenance,
+    pub location: Location,
+}
+
+#[derive(Serialize, Debug)]
+pub struct ParkingLotListResponse {
+    pub status: &'static str,
+    pub parkings: Vec<ParkingLotResponse>,
 }
