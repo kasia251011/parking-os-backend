@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::model::{CostOfMaintenance, Location};
+use super::model::{CostOfMaintenance, Location, Levels};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateUserSchema {
@@ -14,4 +14,5 @@ pub struct CreateUserSchema {
 pub struct CreateParkingSchema {
     pub cost_of_maintenance: CostOfMaintenance,
     pub location: Location,
+    pub levels: Vec<Levels>,
 }

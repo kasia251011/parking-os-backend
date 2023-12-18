@@ -26,6 +26,7 @@ pub struct ParkingLot {
     pub _id: ObjectId,
     pub cost_of_maintenance: CostOfMaintenance,
     pub location: Location,
+    pub levels: Vec<Levels>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -41,6 +42,12 @@ pub struct Location {
     pub address: String,
     pub latitude: f64,
     pub longitude: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Levels {
+    pub cars: u32,
+    pub trucks: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

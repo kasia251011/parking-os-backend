@@ -36,6 +36,7 @@ impl DB {
             _id: ObjectId::new(),
             cost_of_maintenance: body.cost_of_maintenance.to_owned(),
             location: body.location.to_owned(),
+            levels: body.levels.to_owned(),
         };
 
         match self.parking_lot_collection.insert_one(parking, None).await {
@@ -61,6 +62,7 @@ impl DB {
             id: parking._id.to_hex(),
             cost_of_maintance: parking.cost_of_maintenance.to_owned(),
             location: parking.location.to_owned(),
+            levels: parking.levels.to_owned(),
         };
 
         Ok(parking_response)
