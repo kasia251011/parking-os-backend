@@ -24,10 +24,10 @@ pub async fn get_parkings(
 pub async fn create_parking(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<CreateParkingSchema>,
-) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> 
+) -> Result<impl IntoResponse, (StatusCode, String)> 
 {
     match app_state.db.create_parking(&body).await.map_err(MyError::from) {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
-        Err(e) => Err(e.into()),
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
     }
 }

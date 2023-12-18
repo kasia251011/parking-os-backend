@@ -4,7 +4,7 @@ use futures::StreamExt;
 use crate::structs::{
     error::MyError::{*, self}, 
     model::User,
-    response::{UserListResponse, UserResponse, GenericResponse}, 
+    response::UserResponse, 
     schema::CreateUserSchema
 };
 
@@ -13,7 +13,7 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn fetch_users(&self) -> Result<UserListResponse> {
+    pub async fn fetch_users(&self) -> Result<Vec<UserResponse>> {
         let mut cursor = self
             .user_collection
             .find(None, None)
@@ -25,13 +25,10 @@ impl DB {
             json_result.push(self.doc_to_user(&doc.unwrap())?);
         }
     
-        Ok(UserListResponse {
-            status: "200",
-            users: json_result,
-        })
+        Ok(json_result)
     }
 
-    pub async fn create_user(&self, body: &CreateUserSchema) -> Result<GenericResponse> {
+    pub async fn create_user(&self, body: &CreateUserSchema) -> Result<String> {
         let user = User {
             _id: ObjectId::new(),
             name: body.name.to_owned(),
@@ -52,10 +49,7 @@ impl DB {
             }
         };
 
-        Ok(GenericResponse {
-            status: "200".to_string(),
-            message: "Successful operation".to_string(),
-        })
+        Ok("Successful operation".to_string())
     }
     
     fn doc_to_user(&self, user: &User) -> Result<UserResponse> {
