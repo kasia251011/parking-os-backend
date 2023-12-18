@@ -13,6 +13,7 @@ pub struct UserResponse {
     pub id: String,
     pub name: String,
     pub surname: String,
+    #[serde(rename = "accountBalance")]
     pub account_balance: f64,
     pub blocked: bool,
 }
@@ -26,6 +27,7 @@ pub struct UserListResponse {
 #[derive(Serialize, Debug)]
 pub struct ParkingLotResponse {
     pub id: String,
+    #[serde(rename = "costOfMaintenance")]
     pub cost_of_maintance: CostOfMaintenance,
     pub location: Location,
     pub levels: Vec<Levels>,
