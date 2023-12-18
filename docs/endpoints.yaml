@@ -83,6 +83,32 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Vehicle"
+  /tickets/{userId}?active=true:
+    get:
+      tags:
+        - tickets
+      summary: Get all of users active tickets
+      description: Provides array with all of users active tickets <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
+      operationId: usersActiveTickets
+      parameters:
+        - name: userId
+          in: path
+          description: Primary key for users table
+          required: true
+          explode: false
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ticket"
+        "400":
+          description: Invalid user id
   /tickets/{userId}:
     get:
       tags:
@@ -109,6 +135,33 @@ paths:
                   $ref: "#/components/schemas/Ticket"
         "400":
           description: Invalid user id
+  /tickets?code={code}:
+    put:
+      tags:
+        - tickets
+      summary: Update a ticket
+      description: Update a ticket <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: updateTicket
+      parameters:
+        - name: code
+          in: path
+          description: Code of ticket
+          required: true
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: Update a ticket
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Invalid code
   /tickets:
     post:
       tags:
@@ -121,13 +174,59 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Ticket"
+              $ref: "#/components/schemas/TicketCreator"
         required: true
       responses:
         "201":
           description: Successful operation
         "400":
           description: Invalid input
+  /parking-lots/{parkingLotId}/code:
+    get:
+      tags:
+        - parking lots
+      summary: Get parking lot code
+      description: Provides a specifics parking lots code <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
+      operationId: getParkingLotsCode
+      parameters:
+        - name: parkingLotId
+          in: path
+          description: Primary key for parking lot table
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+  /parking-lots/?code={code}:
+    get:
+      tags:
+        - parking lots
+      summary: Get specific parking lot
+      description: Provides object of specific parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: getSpecificParkingLots
+      parameters:
+        - name: code
+          in: path
+          description: Code of parking lot
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                item:
+                  $ref: "#/components/schemas/ParkingLot"
   /parking-lots:
     get:
       tags:
@@ -211,67 +310,18 @@ components:
           type: number
           format: float
           description: Amount of money in PLN
-
-    ParkingLot:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Primary key
-        costOfMaintenance:
-          type: object
-          description: variables for calculating operating costs of the parking lot
-          properties:
-            electricity:
-              type: number
-              format: float
-              description: Amount of money in PLN
-            cleaning:
-              type: number
-              format: float
-              description: Amount of money in PLN
-            security:
-              type: number
-              format: float
-              description: Amount of money in PLN
-        location:
-          type: object
-          description: variables for determining the location of the parking lot
-          properties:
-            city:
-              type: string
-              description: City where the parking lot is located
-            address:
-              type: string
-              description: Address where the parking lot is located
-              examples: ["Zielona 19"]
-            latitude:
-              type: number
-              description: Latitude of the parking lots location
-            longitude:
-              type: number
-              description: Longitude of the parking lots location
-    Vehicle:
+    TicketCreator:
       type: object
       properties:
         userId:
           type: string
           description: User table foregin key
-        type:
+        vehicleLicenceNumber:
           type: string
-          description: Type of vehicle
-          enum:
-            - CAR
-            - TRUCK
-        brand:
+          description: Vehicle table foregin key
+        parkingLotId:
           type: string
-          description: Brand of vehicle
-        model:
-          type: string
-          description: Model of vehicle
-        licencePlateNumber:
-          type: string
-          description: Primary key
+          description: Parking lot table foregin key
     ParkingLotCreateSchema:
       type: object
       properties:
@@ -318,3 +368,68 @@ components:
                 type: number
               trucks:
                 type: number
+    ParkingLot:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Primary key
+        costOfMaintenance:
+          type: object
+          description: variables for calculating operating costs of the parking lot
+          properties:
+            electricity:
+              type: number
+              format: float
+              description: Amount of money in PLN
+            cleaning:
+              type: number
+              format: float
+              description: Amount of money in PLN
+            security:
+              type: number
+              format: float
+              description: Amount of money in PLN
+        location:
+          type: object
+          description: variables for determining the location of the parking lot
+          properties:
+            city:
+              type: string
+              description: City where the parking lot is located
+            address:
+              type: string
+              description: Address where the parking lot is located
+              examples: ["Zielona 19"]
+            latitude:
+              type: number
+              description: Latitude of the parking lots location
+            longitude:
+              type: number
+              description: Longitude of the parking lots location
+        noLevels:
+          type: integer
+          description: Indicator of parking lot level, can be negative
+    Vehicle:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: User table foregin key
+        type:
+          type: string
+          description: Type of vehicle
+          enum:
+            - CAR
+            - TRUCK
+        brand:
+          type: string
+          description: Brand of vehicle
+        model:
+          type: string
+          description: Model of vehicle
+        licencePlateNumber:
+          type: string
+          description: Primary key
+                    
+
