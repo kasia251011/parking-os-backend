@@ -24,10 +24,10 @@ pub async fn get_users(
 pub async fn create_user(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<CreateUserSchema>,
-) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> 
+) -> Result<impl IntoResponse, (StatusCode, String)> 
 {
     match app_state.db.create_user(&body).await.map_err(MyError::from) {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
-        Err(e) => Err(e.into()),
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
     }
 }

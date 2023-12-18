@@ -4,7 +4,7 @@ use futures::StreamExt;
 use crate::structs::{
     error::MyError::{*, self}, 
     model::ParkingLot,
-    response::{GenericResponse, ParkingLotResponse, ParkingLotListResponse}, 
+    response::ParkingLotResponse, 
     schema::CreateParkingSchema
 };
 
@@ -13,7 +13,7 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn fetch_parkings(&self) -> Result<ParkingLotListResponse> {
+    pub async fn fetch_parkings(&self) -> Result<Vec<ParkingLotResponse>> {
         let mut cursor = self
             .parking_lot_collection
             .find(None, None)
@@ -25,13 +25,10 @@ impl DB {
             json_result.push(self.doc_to_parking(&doc.unwrap())?);
         }
     
-        Ok(ParkingLotListResponse {
-            status: "200",
-            parkings: json_result,
-        })
+        Ok(json_result)
     }
 
-    pub async fn create_parking(&self, body: &CreateParkingSchema) -> Result<GenericResponse> {
+    pub async fn create_parking(&self, body: &CreateParkingSchema) -> Result<String> {
         let parking = ParkingLot {
             _id: ObjectId::new(),
             cost_of_maintenance: body.cost_of_maintenance.to_owned(),
@@ -51,10 +48,7 @@ impl DB {
             }
         };
 
-        Ok(GenericResponse {
-            status: "200".to_string(),
-            message: "Successful operation".to_string(),
-        })
+        Ok("Successful operation".to_string())
     }
     
     fn doc_to_parking(&self, parking: &ParkingLot) -> Result<ParkingLotResponse> {
