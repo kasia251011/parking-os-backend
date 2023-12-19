@@ -46,7 +46,7 @@ paths:
       tags:
         - vehicles
       summary: Get all of users vehicles
-      description: Provides array with all of selected users vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      description: Provides array with all of selected users vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
       operationId: adminGetUsersVehicles
       parameters:
         - name: userId
@@ -83,32 +83,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Vehicle"
-  /tickets/{userId}?active=true:
-    get:
-      tags:
-        - tickets
-      summary: Get all of users active tickets
-      description: Provides array with all of users active tickets <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
-      operationId: usersActiveTickets
-      parameters:
-        - name: userId
-          in: path
-          description: Primary key for users table
-          required: true
-          explode: false
-          schema:
-            type: integer
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Ticket"
-        "400":
-          description: Invalid user id
   /tickets/{userId}:
     get:
       tags:
@@ -124,6 +98,14 @@ paths:
           explode: false
           schema:
             type: integer
+        - name: active
+          in: query
+          description: Whether the ticket is currently representing a parked car
+          required: false
+          explode: false
+          schema:
+            type: string
+            examples: ["true"]
       responses:
         "200":
           description: successful operation
@@ -139,9 +121,9 @@ paths:
     put:
       tags:
         - tickets
-      summary: Update a ticket
-      description: Update a ticket <br> Allowed roles<span>&#58;</span>  ```ADMIN```
-      operationId: updateTicket
+      summary: Delete a ticket
+      description: Delete a ticket <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: deleteTicket
       parameters:
         - name: code
           in: path
@@ -150,13 +132,6 @@ paths:
           explode: false
           schema:
             type: string
-      requestBody:
-        description: Update a ticket
-        content:
-          application/json:
-            schema:
-              type: string
-        required: true
       responses:
         "201":
           description: Successful operation
@@ -174,7 +149,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TicketCreator"
+              $ref: "#/components/schemas/TicketCreateSchema"
         required: true
       responses:
         "201":
@@ -224,8 +199,6 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                item:
                   $ref: "#/components/schemas/ParkingLot"
   /parking-lots:
     get:
@@ -310,7 +283,16 @@ components:
           type: number
           format: float
           description: Amount of money in PLN
-    TicketCreator:
+        spotName:
+          type: string
+          description: Name or number of parking spot identifiable by a user
+        level:
+          type: integer
+          description: Parking lot level of the parking spot
+        parkingLotId:
+          type: string
+          description: Parking lot table foregin key
+    TicketCreateSchema:
       type: object
       properties:
         userId:
