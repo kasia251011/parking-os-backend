@@ -65,7 +65,7 @@ impl DB {
             }
         };
 
-        Ok(ticket_id.to_hex())
+        Ok(ticket_id.to_hex().chars().take(8).collect())
     }
 
     fn doc_to_ticket(&self, ticket: &Ticket) -> Result<TicketResponse> {
