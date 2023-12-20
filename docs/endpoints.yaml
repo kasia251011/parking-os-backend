@@ -306,6 +306,9 @@ components:
         parkingLotId:
           type: string
           description: Parking lot table foregin key
+        code:
+          type: string
+          description: Access code (this field will be here until GET me/ticket doesn't exist)
     TicketCreateSchema:
       type: object
       properties:
