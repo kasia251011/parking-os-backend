@@ -14,20 +14,20 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    // pub async fn fetch_parking_spaces(&self) -> Result<Vec<ParkingSpace>> {
-    //     let mut cursor = self
-    //         .parking_space_collection
-    //         .find(None, None)
-    //         .await
-    //         .map_err(MongoQueryError)?;
+    pub async fn fetch_parking_spaces(&self) -> Result<Vec<ParkingSpace>> {
+        let mut cursor = self
+            .parking_space_collection
+            .find(None, None)
+            .await
+            .map_err(MongoQueryError)?;
 
-    //     let mut json_result: Vec<ParkingSpace> = Vec::new();
-    //     while let Some(doc) = cursor.next().await {
-    //         json_result.push(doc.unwrap());
-    //     }
+        let mut json_result: Vec<ParkingSpace> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            json_result.push(doc.unwrap());
+        }
 
-    //     Ok(json_result)
-    // }
+        Ok(json_result)
+    }
 
     pub async fn create_parking_space(&self, parking_space: &CreateParkingSpaceSchema) -> Result<String> {
         let new_parking_space_id = ObjectId::new();
@@ -91,10 +91,10 @@ impl DB {
         Ok(json_result[0].to_owned())
     }
 
-    async fn toggle_occupied_parking_space(&self, parking_space_id: &str) -> Result<String> {
+    pub async fn toggle_occupied_parking_space(&self, parking_space_id: &str) -> Result<String> {
         let oid = ObjectId::from_str(parking_space_id).map_err(|_| InvalidIDError(parking_space_id.to_owned()))?;
 
-        let parking_space = self
+        let parking_space = match self
             .parking_space_collection
             .find_one(
                 doc! {
@@ -103,10 +103,15 @@ impl DB {
                 None,
             )
             .await
-            .map_err(MongoQueryError)?;
+            .map_err(MongoQueryError)? 
+        {
+            Some(parking_space) => Some(parking_space),
+            None => return Err(NotFoundError(format!("parking_space with id: {}", parking_space_id))),
+        };
 
         let mut parking_space = parking_space.unwrap();
         parking_space.occupied = !parking_space.occupied;
+
 
         self.parking_space_collection
             .update_one(
@@ -126,25 +131,22 @@ impl DB {
         Ok("Successful operation".to_string())
     }
 
-    // pub async fn get_parking_spaces_by_parking_lot_id(&self, parking_lot_id: &str) -> Result<Vec<ParkingSpace>> {
-    //     let oid = ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?;
+    pub async fn get_parking_space_by_location(&self, parking_lot_id: &str, spot_name: &str, level: u32) -> Result<ParkingSpace> {
+        let parking_space = self
+            .fetch_parking_spaces()
+            .await?
+            .into_iter()
+            .find(|parking_space| {
+                parking_space.parking_lot_id == ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned())).unwrap()
+                    && parking_space.location.no_space.to_string() == spot_name
+                    && parking_space.location.no_level == level
+            });
 
-    //     let mut cursor = self
-    //         .parking_space_collection
-    //         .find(
-    //             doc! {
-    //                 "parking_lot_id": oid,
-    //             },
-    //             None,
-    //         )
-    //         .await
-    //         .map_err(MongoQueryError)?;
+        println!("parking_space: {:?}", parking_space);
 
-    //     let mut json_result: Vec<ParkingSpace> = Vec::new();
-    //     while let Some(doc) = cursor.next().await {
-    //         json_result.push(doc.unwrap());
-    //     }
-
-    //     Ok(json_result)
-    // }
+        match parking_space {
+            Some(parking_space) => Ok(parking_space),
+            None => Err(NotFoundError(format!("parking_space with spot_name: {}", spot_name))),
+        }
+    }
 }

@@ -6,7 +6,7 @@ use std::{time::Duration, sync::Arc};
 use axum::{
     http::{header, HeaderValue, Method,
             header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},},
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 use dotenv::dotenv;
@@ -25,7 +25,7 @@ use handlers::{
     users::{create_user, get_users}, 
     parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code},
     vehicle::{create_vehicle, get_vehicles}, 
-    ticket::{get_tickets, create_ticket},
+    ticket::{get_tickets, create_ticket, put_ticket},
 };
 use db::common::DB;
 
@@ -71,6 +71,7 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/parking-lots/", get(get_parking_by_code))
         .route("/vehicles", get(get_vehicles).post(create_vehicle))
         .route("/tickets", get(get_tickets).post(create_ticket))
+        .route("/tickets/", put(put_ticket))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))

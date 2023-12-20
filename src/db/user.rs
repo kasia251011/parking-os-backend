@@ -1,4 +1,6 @@
-use bson::oid::ObjectId;
+use std::str::FromStr;
+
+use bson::{oid::ObjectId, doc};
 use futures::StreamExt;
 
 use crate::structs::{
@@ -48,6 +50,44 @@ impl DB {
                 return Err(MongoQueryError(e));
             }
         };
+
+        Ok("Successful operation".to_string())
+    }
+
+    pub async fn get_user_by_id(&self, user_id: &str) -> Result<User> {
+        let filter = doc! { "_id": ObjectId::from_str(user_id).unwrap() };
+        let user = self
+            .user_collection
+            .find_one(filter, None)
+            .await
+            .map_err(MongoQueryError)?
+            .ok_or(MongoNotFound("User not found".to_string()))?;
+
+        Ok(user)
+    }
+
+    pub async fn transfer_balance(&self, user_id: &str, amount: f64) -> Result<String> {
+        let user = self.get_user_by_id(user_id).await?;
+        let admin = self.get_user_by_id("6581ca3eee6bbb6e8aca7fc4").await?;
+        let new_balance_admin = admin.account_balance + amount;
+        let new_balance = match user.account_balance - amount {
+            x if x < 0.0 => return Err(NotEnoughBalanceError("Not enough balance".to_string())),
+            x => x,
+        };
+
+        let filter = doc! { "_id": ObjectId::from_str(user_id).unwrap() };
+        let update = doc! { "$set": { "account_balance": new_balance } };
+        self.user_collection
+            .update_one(filter, update, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        let filter = doc! { "_id": ObjectId::from_str("6581ca3eee6bbb6e8aca7fc4").unwrap() };
+        let update = doc! { "$set": { "account_balance": new_balance_admin } };
+        self.user_collection
+            .update_one(filter, update, None)
+            .await
+            .map_err(MongoQueryError)?;
 
         Ok("Successful operation".to_string())
     }
