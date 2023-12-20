@@ -29,11 +29,12 @@ impl DB {
     }
 
     pub async fn create_parking(&self, body: &CreateParkingSchema) -> Result<String> {
+        let new_parking_lot_id = ObjectId::new();
         let parking = ParkingLot {
-            _id: ObjectId::new(),
+            _id: new_parking_lot_id,
             cost_of_maintenance: body.cost_of_maintenance.to_owned(),
             location: body.location.to_owned(),
-            levels: body.levels.to_owned(),
+            no_levels: body.levels.len() as u32,
         };
 
         match self.parking_lot_collection.insert_one(parking, None).await {
@@ -48,6 +49,8 @@ impl DB {
             }
         };
 
+
+
         Ok("Successful operation".to_string())
     }
     
@@ -56,7 +59,7 @@ impl DB {
             id: parking._id.to_hex(),
             cost_of_maintance: parking.cost_of_maintenance.to_owned(),
             location: parking.location.to_owned(),
-            levels: parking.levels.to_owned(),
+            no_levels: parking.no_levels.to_owned(),
         };
 
         Ok(parking_response)
