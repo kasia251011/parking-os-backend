@@ -11,7 +11,7 @@ paths:
     get:
       tags:
         - users
-      summary: Get info on all users
+      summary: Get all users
       description: Provides array with all registered users <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: adminGetUsers
       responses:
@@ -41,18 +41,18 @@ paths:
           description: Successful operation
         "400":
           description: Invalid input
-  /vehicles/{userId}:
+  /vehicles:
     get:
       tags:
         - vehicles
-      summary: Get all of users vehicles
-      description: Provides array with all of selected users vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
-      operationId: adminGetUsersVehicles
+      summary: Get all vehicles
+      description: Provides array with all registered vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: adminGetVehicles
       parameters:
         - name: userId
-          in: path
+          in: query
           description: Primary key for users table
-          required: true
+          required: false
           explode: false
           schema:
             type: integer
@@ -65,36 +65,35 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Vehicle"
-        "400":
-          description: Invalid user id
-  /vehicles:
-    get:
+    post:
       tags:
         - vehicles
-      summary: Get all vehicles
-      description: Provides array with all registered vehicles <br> Allowed roles<span>&#58;</span>  ```ADMIN```
-      operationId: adminGetVehicles
+      summary: Add vehicle
+      description: Add a vehicle (development only) <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: adminAddVehicle
+      requestBody:
+        description: Vehicle
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
       responses:
         "200":
           description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Vehicle"
-  /tickets/{userId}:
+          
+  /tickets:
     get:
       tags:
         - tickets
-      summary: Get all of users tickets
-      description: Provides array with all of users tickets <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      summary: Get all tickets
+      description: Provides array with all tickets <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: usersTickets
       parameters:
         - name: userId
-          in: path
-          description: Primary key for users table
-          required: true
+          in: query
+          description: User Id
+          required: false
           explode: false
           schema:
             type: integer
@@ -117,27 +116,6 @@ paths:
                   $ref: "#/components/schemas/Ticket"
         "400":
           description: Invalid user id
-  /tickets?code={code}:
-    put:
-      tags:
-        - tickets
-      summary: Delete a ticket
-      description: Delete a ticket <br> Allowed roles<span>&#58;</span>  ```ADMIN```
-      operationId: deleteTicket
-      parameters:
-        - name: code
-          in: path
-          description: Code of ticket
-          required: true
-          explode: false
-          schema:
-            type: string
-      responses:
-        "201":
-          description: Successful operation
-        "400":
-          description: Invalid code
-  /tickets:
     post:
       tags:
         - tickets
@@ -156,17 +134,37 @@ paths:
           description: Successful operation
         "400":
           description: Invalid input
-  /parking-lots/{parkingLotId}/code:
+  /tickets/{code}:
+    put:
+      tags:
+        - tickets
+      summary: Validate a ticket
+      description: Validate a ticket <br> Allowed roles<span>&#58;</span>  ```ADMIN```,  ```USER```
+      operationId: validateTicket
+      parameters:
+        - name: code
+          in: path
+          description: Code of ticket
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Invalid code
+  /parking-lots/{id}/code:
     get:
       tags:
         - parking lots
       summary: Get parking lot code
-      description: Provides a specifics parking lots code <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
+      description: Provides a specifics parking lots code <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: getParkingLotsCode
       parameters:
-        - name: parkingLotId
+        - name: id
           in: path
-          description: Primary key for parking lot table
+          description: Parking lot id
           required: true
           explode: false
           schema:
@@ -178,35 +176,21 @@ paths:
             application/json:
               schema:
                 type: string
-  /parking-lots/?code={code}:
-    get:
-      tags:
-        - parking lots
-      summary: Get specific parking lot
-      description: Provides object of specific parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
-      operationId: getSpecificParkingLots
-      parameters:
-        - name: code
-          in: path
-          description: Code of parking lot
-          required: true
-          explode: false
-          schema:
-            type: string
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                  $ref: "#/components/schemas/ParkingLot"
   /parking-lots:
     get:
       tags:
         - parking lots
       summary: Get all parking lots
-      description: Provides array with all parking lots <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      description: Provides array with all parking lots <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
       operationId: getParkingLots
+      parameters:
+        - name: code
+          in: query
+          description: Code of parking lot
+          required: false
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: successful operation
@@ -216,12 +200,42 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ParkingLot"
+  /parking-lots/{id}:
+    get:
+      tags:
+        - parking lots
+      summary: Get parking lot by id
+      description: Provides array with all parking lots <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
+      operationId: getParkingLotById
+      parameters:
+        - name: id
+          in: path
+          description: Parking lot id
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingLot"
     post:
       tags:
         - parking lots
       summary: Add a new parking lot
       description: Add a new parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
       operationId: addParkingLot
+      parameters:
+        - name: id
+          in: path
+          description: Parking lot id
+          required: true
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Create a new parking lot
         content:
@@ -397,7 +411,7 @@ components:
       properties:
         userId:
           type: string
-          description: User table foregin key
+          description: User table foreign key
         type:
           type: string
           description: Type of vehicle
@@ -414,4 +428,3 @@ components:
           type: string
           description: Primary key
                     
-
