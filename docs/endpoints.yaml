@@ -283,9 +283,9 @@ components:
           type: number
           format: float
           description: Amount of money in PLN
-        spotName:
-          type: string
-          description: Name or number of parking spot identifiable by a user
+        spotNumber:
+          type: integer
+          description: NNumber of parking spot identifiable by a user
         level:
           type: integer
           description: Parking lot level of the parking spot
