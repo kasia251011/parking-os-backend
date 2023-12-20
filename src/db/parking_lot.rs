@@ -51,16 +51,18 @@ impl DB {
             }
         };
 
+        let mut spot_name: u32 = 0;
         for (idx, level) in body.levels.iter().enumerate() {
-            for num in 0..level.cars {
+            for _ in 0..level.cars {
                 self.create_parking_space(&CreateParkingSpaceSchema {
                     parking_lot_id: new_parking_lot_id,
                     location: ParkingLocation {
                         no_level: idx as u32,
-                        no_space: num,
+                        no_space: spot_name,
                     },
                     vehicle_type: VehicleType::Car,
                 }).await?;
+                spot_name += 1;
             }
             for num in 0..level.trucks {
                 self.create_parking_space(&CreateParkingSpaceSchema {
@@ -71,6 +73,7 @@ impl DB {
                     },
                     vehicle_type: VehicleType::Truck,
                 }).await?;
+                spot_name += 1;
             }
         }
 
@@ -101,6 +104,8 @@ impl DB {
             )
             .await
             .map_err(MongoQueryError)?;
+
+        println!("parking_lot: {:?}", parking_lot);
         
         match parking_lot {
             Some(doc) => Ok(self.doc_to_parking(&doc)?),

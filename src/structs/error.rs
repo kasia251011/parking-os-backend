@@ -27,6 +27,8 @@ pub enum MyError {
     InvalidCodeError(String),
     #[error("invalid vehicle type: {0}")]
     InvalidVehicleTypeError(String),
+    #[error("No available parking space at parking: {0}")]
+    NoParkingSpaceError(String),
 }
 
 #[derive(Serialize)]
@@ -120,6 +122,13 @@ impl Into<(axum::http::StatusCode, Json<serde_json::Value>)> for MyError {
                 ErrorResponse {
                     status: "400",
                     message: format!("invalid vehicle type: {}", vehicle_type),
+                },
+            ),
+            MyError::NoParkingSpaceError(parking_lot_id) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("No parking space at parking: {}", parking_lot_id),
                 },
             ),
         };

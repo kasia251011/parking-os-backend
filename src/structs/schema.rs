@@ -38,3 +38,13 @@ pub struct CreateVehicleSchema {
     #[serde(rename = "licencePlateNumber")]
     pub licence_plate_number: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CreateTicketSchema {
+    #[serde(rename = "userId")]
+    pub user_id: String,
+    #[serde(rename = "vehicleLicenceNumber")]
+    pub vehicle_licence_number: String,
+    #[serde(rename = "parkingLotId")]
+    pub parking_lot_id: String,
+}

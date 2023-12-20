@@ -32,3 +32,24 @@ pub struct VehicleResponse {
     #[serde(rename = "licencePlateNumber")]
     pub licence_plate_number: String,
 }
+
+#[derive(Serialize, Debug)]
+pub struct TicketResponse {
+    pub id: String,
+    #[serde(rename = "userId")]
+    pub user_id: String,
+    #[serde(rename = "vehicleLicenceNumber")]
+    pub vehicle_licence_number: String,
+    #[serde(rename = "issueTimestamp")]
+    pub issue_timestamp: i64,
+    #[serde(rename = "endTimestamp")]
+    pub end_timestamp: i64,
+    #[serde(rename = "amountPaid")]
+    pub amount_paid: f64,
+    #[serde(rename = "spotName")]
+    pub spot_name: String,
+    pub level: u32,
+    #[serde(rename = "parkingLotId")]
+    pub parking_lot_id: String,
+    pub code: String,
+}

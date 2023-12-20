@@ -14,11 +14,14 @@ pub struct User {
 pub struct Ticket {
     pub _id: ObjectId,
     pub user_id: String,
-    pub vehicle_license_number: String,
-    pub parking_space_id: String,
+    pub vehicle_licence_number: String,
     pub issue_timestamp: i64,
     pub end_timestamp: i64,
     pub amount_paid: f64,
+    pub spot_name: String,
+    pub level: u32,
+    pub parking_lot_id: String,
+    pub code: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
