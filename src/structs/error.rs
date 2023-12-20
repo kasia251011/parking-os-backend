@@ -29,6 +29,10 @@ pub enum MyError {
     InvalidVehicleTypeError(String),
     #[error("No available parking space at parking: {0}")]
     NoParkingSpaceError(String),
+    #[error("MongoDB not found: {0}")]
+    MongoNotFound(String),
+    #[error("Not enough balance: {0}")]
+    NotEnoughBalanceError(String),
 }
 
 #[derive(Serialize)]
@@ -129,6 +133,20 @@ impl Into<(axum::http::StatusCode, Json<serde_json::Value>)> for MyError {
                 ErrorResponse {
                     status: "400",
                     message: format!("No parking space at parking: {}", parking_lot_id),
+                },
+            ),
+            MyError::MongoNotFound(id) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("MongoDB not found: {}", id),
+                },
+            ),
+            MyError::NotEnoughBalanceError(message) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("Not enough balance: {}", message),
                 },
             ),
         };
