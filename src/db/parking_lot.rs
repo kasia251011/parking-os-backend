@@ -3,9 +3,9 @@ use futures::StreamExt;
 
 use crate::structs::{
     error::MyError::{*, self}, 
-    model::ParkingLot,
+    model::{ParkingLot, ParkingLocation, VehicleType},
     response::ParkingLotResponse, 
-    schema::CreateParkingSchema
+    schema::{CreateParkingSchema, CreateParkingSpaceSchema}
 };
 
 use super::common::DB;
@@ -49,7 +49,28 @@ impl DB {
             }
         };
 
-
+        for (idx, level) in body.levels.iter().enumerate() {
+            for num in 0..level.cars {
+                self.create_parking_space(&CreateParkingSpaceSchema {
+                    parking_lot_id: new_parking_lot_id,
+                    location: ParkingLocation {
+                        no_level: idx as u32,
+                        no_space: num,
+                    },
+                    vehicle_type: VehicleType::Car,
+                }).await?;
+            }
+            for num in 0..level.trucks {
+                self.create_parking_space(&CreateParkingSpaceSchema {
+                    parking_lot_id: new_parking_lot_id,
+                    location: ParkingLocation {
+                        no_level: idx as u32,
+                        no_space: num,
+                    },
+                    vehicle_type: VehicleType::Truck,
+                }).await?;
+            }
+        }
 
         Ok("Successful operation".to_string())
     }

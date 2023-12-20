@@ -12,6 +12,8 @@ pub struct DB {
     pub ticket_collection:          Collection<Ticket>,
     pub parking_lot_collection:     Collection<ParkingLot>,
     pub vehicle_collection:         Collection<Vehicle>,
+    pub parking_space_collection:   Collection<ParkingSpace>,
+    pub tariff_collection:          Collection<Tariff>,
 }
 
 type Result<T> = std::result::Result<T, MyError>;
@@ -68,6 +70,8 @@ impl DB {
             ticket_collection,
             parking_lot_collection,
             vehicle_collection,
+            parking_space_collection,
+            tariff_collection,
         })
     }
 }

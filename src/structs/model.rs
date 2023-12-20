@@ -63,8 +63,8 @@ pub struct Vehicle {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ParkingSpace {
     pub _id: ObjectId,
-    pub parking_lot_id: String,
-    pub parking: ParkingLocation,
+    pub parking_lot_id: ObjectId,
+    pub location: ParkingLocation,
     pub vehicle_type: VehicleType,
     pub occupied: bool,
     pub price_modifier: f64, // default 1.0
