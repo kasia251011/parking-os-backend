@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use axum::extract::Path;
 use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
 use crate::AppState;
@@ -28,6 +29,25 @@ pub async fn create_parking(
 {
     match app_state.db.create_parking(&body).await.map_err(MyError::from) {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
+    }
+}
+
+pub async fn generate_parking_lot_code(
+    Path(parking_lot_id): Path<String>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, String)>
+{
+    match app_state
+        .db
+        .get_parking_lot_by_id(&parking_lot_id)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => {
+            let res: String = res.id.chars().take(8).collect();
+            Ok((StatusCode::CREATED, Json(res)))
+        },
         Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
     }
 }

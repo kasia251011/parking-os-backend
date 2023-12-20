@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use super::model::{CostOfMaintenance, Location, Levels};
+use super::model::{CostOfMaintenance, Location};
 
 #[derive(Serialize, Debug)]
 pub struct UserResponse {
@@ -18,5 +18,5 @@ pub struct ParkingLotResponse {
     #[serde(rename = "costOfMaintenance")]
     pub cost_of_maintance: CostOfMaintenance,
     pub location: Location,
-    pub levels: Vec<Levels>,
+    pub no_levels: u32,
 }

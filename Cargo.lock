@@ -1072,6 +1072,7 @@ name = "parking-os-backend"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "base64 0.21.5",
  "bson",
  "chrono",
  "dotenv",

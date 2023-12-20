@@ -21,6 +21,8 @@ pub enum MyError {
     InvalidIDError(String),
     #[error("Note with ID: {0} not found")]
     NotFoundError(String),
+    #[error("No available parking space at parking: {0}")]
+    NoAvailableParkingSpaceError(String),
 }
 
 #[derive(Serialize)]
@@ -93,6 +95,13 @@ impl Into<(axum::http::StatusCode, Json<serde_json::Value>)> for MyError {
                 ErrorResponse {
                     status: "400",
                     message: format!("MongoDB error: {}", e),
+                },
+            ),
+            MyError::NoAvailableParkingSpaceError(parking_lot_id) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("No available parking space at parking: {}", parking_lot_id),
                 },
             ),
         };

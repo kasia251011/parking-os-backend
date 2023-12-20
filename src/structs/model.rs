@@ -26,7 +26,7 @@ pub struct ParkingLot {
     pub _id: ObjectId,
     pub cost_of_maintenance: CostOfMaintenance,
     pub location: Location,
-    pub levels: Vec<Levels>,
+    pub no_levels: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -54,8 +54,38 @@ pub struct Levels {
 pub struct Vehicle {
     pub _id: ObjectId,
     pub user_id: String,
-    pub r#type: String,
+    pub r#type: VehicleType,
     pub brand: String,
     pub model: String,
     pub licence_plate_number: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ParkingSpace {
+    pub _id: ObjectId,
+    pub parking_lot_id: ObjectId,
+    pub location: ParkingLocation,
+    pub vehicle_type: VehicleType,
+    pub occupied: bool,
+    pub price_modifier: f64, // default 1.0
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum VehicleType {
+    Car,
+    Truck,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ParkingLocation {
+    pub no_level: u32,
+    pub no_space: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Tariff {
+    pub _id: ObjectId,
+    pub parking_lot_id: String,
+    pub maximum_time: f64,
+    pub price_per_hour: f64,
 }

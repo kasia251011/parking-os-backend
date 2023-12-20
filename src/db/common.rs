@@ -3,7 +3,7 @@ use mongodb::{options::{Compressor, ClientOptions}, Collection, Client};
 
 use crate::structs::{
     error::MyError, 
-    model::{ParkingLot, Ticket, User, Vehicle}, 
+    model::{ParkingLot, Ticket, User, Vehicle, ParkingSpace, Tariff}, 
 };
 
 #[derive(Clone, Debug)]
@@ -12,6 +12,8 @@ pub struct DB {
     pub ticket_collection:          Collection<Ticket>,
     pub parking_lot_collection:     Collection<ParkingLot>,
     pub vehicle_collection:         Collection<Vehicle>,
+    pub parking_space_collection:   Collection<ParkingSpace>,
+    pub tariff_collection:          Collection<Tariff>,
 }
 
 type Result<T> = std::result::Result<T, MyError>;
@@ -58,6 +60,8 @@ impl DB {
         let ticket_collection: Collection<Ticket> = database.collection("ticket");
         let parking_lot_collection: Collection<ParkingLot> = database.collection("parking_lot");
         let vehicle_collection: Collection<Vehicle> = database.collection("vehicle");
+        let parking_space_collection: Collection<ParkingSpace> = database.collection("parking_space");
+        let tariff_collection: Collection<Tariff> = database.collection("tariff");
 
         println!("Database connected successfully");
 
@@ -66,6 +70,8 @@ impl DB {
             ticket_collection,
             parking_lot_collection,
             vehicle_collection,
+            parking_space_collection,
+            tariff_collection,
         })
     }
 }
