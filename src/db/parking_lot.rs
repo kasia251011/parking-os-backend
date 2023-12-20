@@ -5,7 +5,7 @@ use futures::StreamExt;
 
 use crate::structs::{
     error::MyError::{*, self}, 
-    model::{ParkingLot, ParkingLocation, VehicleType, ParkingSpace},
+    model::{ParkingLot, ParkingLocation, VehicleType},
     response::ParkingLotResponse, 
     schema::{CreateParkingSchema, CreateParkingSpaceSchema},  
 };
@@ -108,25 +108,25 @@ impl DB {
         }
     }
 
-    pub async fn get_parking_spaces_by_parking_lot_id(&self, parking_lot_id: &str) -> Result<Vec<ParkingSpace>> {
-        let oid = ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?;
-
-        let mut cursor = self
-            .parking_space_collection
-            .find(
-                doc! {
-                    "parking_lot_id": oid,
-                },
-                None,
-            )
-            .await
-            .map_err(MongoQueryError)?;
-
-        let mut json_result: Vec<ParkingSpace> = Vec::new();
-        while let Some(doc) = cursor.next().await {
-            json_result.push(doc.unwrap());
+    pub async fn get_parking_lot_by_code(&self, code: &str) -> Result<ParkingLotResponse> {
+        println!("code: {}", code);
+        match code.len() {
+            0..=7 => return Err(InvalidCodeError(code.to_string())),
+            8 => (),
+            _ => return Err(InvalidCodeError(code.to_string())),
         }
+        let parking_lot = self
+            .fetch_parkings()
+            .await?
+            .into_iter()
+            .find(|parking_lot| parking_lot.id.starts_with(code))
+            .map(|parking_lot| parking_lot);
 
-        Ok(json_result)
+        println!("parking_lot: {:?}", parking_lot);
+        
+        match parking_lot {
+            Some(doc) => Ok(doc),
+            None => Err(NotFoundError(code.to_string()))
+        }
     }
 }

@@ -20,3 +20,15 @@ pub struct ParkingLotResponse {
     pub location: Location,
     pub no_levels: u32,
 }
+
+#[derive(Serialize, Debug)]
+pub struct VehicleResponse {
+    #[serde(rename = "userId")]
+    pub user_id: String,
+    #[serde(rename = "type")]
+    pub vehicle_type: String,
+    pub brand: String,
+    pub model: String,
+    #[serde(rename = "licencePlateNumber")]
+    pub licence_plate_number: String,
+}

@@ -1,4 +1,5 @@
 pub mod sample;
 pub mod common;
-pub mod admin;
-pub mod user;
+pub mod parking_lot;
+pub mod users;
+pub mod vehicle;

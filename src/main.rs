@@ -22,8 +22,9 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use handlers::{
     common::handler_404,
     sample::{create_sample_user, root},
-    admin::{users::{create_user, get_users}, parking_lot::generate_parking_lot_code},
-    admin::parking_lot::{create_parking, get_parkings},
+    users::{create_user, get_users}, 
+    parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code},
+    vehicle::{create_vehicle, get_vehicles}
 };
 use db::common::DB;
 
@@ -63,11 +64,11 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
     let app = Router::new()
         .route("/sample/", get(root))
         .route("/sample/users/", post(create_sample_user))
-        .route("/users", get(get_users))
-        .route("/users", post(create_user))
-        .route("/parking-lots", get(get_parkings))
-        .route("/parking-lots", post(create_parking))
+        .route("/users", get(get_users).post(create_user))
+        .route("/parking-lots", get(get_parkings).post(create_parking))
         .route("/parking-lots/:id/code", get(generate_parking_lot_code))
+        .route("/parking-lots/", get(get_parking_by_code))
+        .route("/vehicles", get(get_vehicles).post(create_vehicle))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))

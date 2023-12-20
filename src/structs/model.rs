@@ -54,7 +54,8 @@ pub struct Levels {
 pub struct Vehicle {
     pub _id: ObjectId,
     pub user_id: String,
-    pub r#type: VehicleType,
+    #[serde(rename = "type")]
+    pub vehicle_type: VehicleType,
     pub brand: String,
     pub model: String,
     pub licence_plate_number: String,

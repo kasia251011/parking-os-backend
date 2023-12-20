@@ -1,11 +1,14 @@
 use std::sync::Arc;
 
-use axum::extract::Path;
+use axum::extract::{Path, Query};
 use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
 use crate::AppState;
-use crate::structs::error::MyError;
-use crate::structs::schema::*;
+use crate::structs::{
+    error::MyError,
+    schema::*,
+    query::QueryParkingLotCode,
+};
 
 pub async fn get_parkings(
     State(app_state): State<Arc<AppState>>,
@@ -48,6 +51,22 @@ pub async fn generate_parking_lot_code(
             let res: String = res.id.chars().take(8).collect();
             Ok((StatusCode::CREATED, Json(res)))
         },
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
+    }
+}
+
+pub async fn get_parking_by_code(
+    Query(QueryParkingLotCode { code }): Query<QueryParkingLotCode>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, String)>
+{
+    match app_state
+        .db
+        .get_parking_lot_by_code(&code)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => Ok(Json(res)),
         Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
     }
 }
