@@ -50,7 +50,7 @@ impl DB {
             .await?;
 
         let parking_space = self
-            .get_new_parking_space_by_licence_number(&body.vehicle_licence_number, &parking_lot.id)
+            .get_new_parking_space_by_license_number(&body.vehicle_license_number, &parking_lot.id)
             .await?;
 
         println!("parking_space: {:?}", parking_space);
@@ -59,7 +59,7 @@ impl DB {
         let ticket = Ticket {
             _id: ticket_id,
             user_id: body.user_id.to_owned(),
-            vehicle_licence_number: body.vehicle_licence_number.to_owned(),
+            vehicle_license_number: body.vehicle_license_number.to_owned(),
             issue_timestamp: chrono::Utc::now().timestamp(),
             end_timestamp: 0,
             amount_paid: 0.0,
@@ -148,7 +148,7 @@ impl DB {
         let ticket_response = TicketResponse {
             id: ticket._id.to_hex(),
             user_id: ticket.user_id.to_owned(),
-            vehicle_licence_number: ticket.vehicle_licence_number.to_owned(),
+            vehicle_license_number: ticket.vehicle_license_number.to_owned(),
             issue_timestamp: ticket.issue_timestamp,
             end_timestamp: ticket.end_timestamp,
             amount_paid: ticket.amount_paid,

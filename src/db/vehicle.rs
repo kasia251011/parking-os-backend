@@ -39,7 +39,7 @@ impl DB {
             user_id: body.user_id.to_owned(),
             brand: body.brand.to_owned(),
             model: body.model.to_owned(),
-            licence_plate_number: body.licence_plate_number.to_owned(),
+            license_plate_number: body.license_plate_number.to_owned(),
         };
 
         match self.vehicle_collection.insert_one(vehicle, None).await {
@@ -66,7 +66,7 @@ impl DB {
             },
             brand: vehicle.brand.to_owned(),
             model: vehicle.model.to_owned(),
-            licence_plate_number: vehicle.licence_plate_number.to_owned(),
+            license_plate_number: vehicle.license_plate_number.to_owned(),
         })
     }
 }
