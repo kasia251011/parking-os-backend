@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use axum::extract::Query;
+use axum::extract::{Query, Path};
 use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
 use crate::AppState;
-use crate::structs::query::{QueryTicketCode, QueryTicket};
+use crate::structs::query::QueryTicket;
 use crate::structs::{
     error::MyError,
     schema::*,
@@ -38,7 +38,7 @@ pub async fn create_ticket(
 }
 
 pub async fn put_ticket(
-    Query(QueryTicketCode { code }): Query<QueryTicketCode>,
+    Path(code): Path<String>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> 
 {

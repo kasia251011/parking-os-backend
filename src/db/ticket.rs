@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use bson::{oid::ObjectId, doc};
 use futures::StreamExt;
 
@@ -115,32 +117,52 @@ impl DB {
     }
 
     pub async fn update_ticket(&self, ticket: &Ticket, parking_space: &ParkingSpace) -> Result<TicketResponse> {
-        let filter = doc! { "_id": ticket._id.to_owned() };
+        let filter = doc! { "_id": ticket._id.clone() };
 
         // TODO get ticket's tariff
         // TODO calculate amount paid
-        let amount_paid = 1.0;
+        let amount_paid = 1.0 + parking_space.price_modifier;
+        let end_timestamp = chrono::Utc::now().timestamp();
         let update = doc! { 
             "$set": { 
-                "end_timestamp": chrono::Utc::now().timestamp(), 
-                "amount_paid": amount_paid + parking_space.price_modifier 
+                "end_timestamp": end_timestamp,
+                "amount_paid": amount_paid,
         }};
 
-        let ticket = self
+        self
             .ticket_collection
-            .find_one_and_update(filter, update, None)
+            .update_one(filter, update, None)
             .await
             .map_err(MongoQueryError)?;
+
+
+        let ticket = self
+            .get_ticket_by_id(&ticket._id.to_hex())
+            .await;
 
         println!("ticket: {:?}", ticket);
 
         self.toggle_occupied_parking_space(&parking_space._id.to_hex()).await?;
 
-        self.transfer_balance(&ticket.clone().unwrap().user_id, amount_paid).await?;
+        self.transfer_balance(&ticket.as_ref().unwrap().user_id, amount_paid).await?;
 
         match ticket {
-            Some(ticket) => Ok(self.doc_to_ticket(&ticket)?),
-            None => Err(MongoNotFound(format!("ticket with code: {}", ticket.unwrap().code))),
+            Ok(ticket) => Ok(self.doc_to_ticket(&ticket)?),
+            Err(_) => Err(MongoNotFound(format!("ticket with code: {}", ticket.unwrap().code))),
+        }
+    }
+
+    pub async fn get_ticket_by_id(&self, id: &str) -> Result<Ticket> {
+        let filter = doc! { "_id": ObjectId::from_str(id).unwrap() };
+        let ticket = self
+            .ticket_collection
+            .find_one(filter, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        match ticket {
+            Some(ticket) => Ok(ticket),
+            None => Err(MongoNotFound(format!("ticket with id: {}", id))),
         }
     }
 
