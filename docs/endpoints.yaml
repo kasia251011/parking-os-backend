@@ -152,6 +152,10 @@ paths:
       responses:
         "201":
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ticket"
         "400":
           description: Invalid code
   /parking-lots/{id}/code:
@@ -279,7 +283,7 @@ components:
         userId:
           type: string
           description: User table foregin key
-        vehicleLicenceNumber:
+        vehicleLicenseNumber:
           type: string
           description: Vehicle table foregin key
         parkingSpaceId:
@@ -315,7 +319,7 @@ components:
         userId:
           type: string
           description: User table foregin key
-        vehicleLicenceNumber:
+        vehicleLicenseNumber:
           type: string
           description: Vehicle table foregin key
         parkingLotId:
@@ -427,7 +431,7 @@ components:
         model:
           type: string
           description: Model of vehicle
-        licencePlateNumber:
+        licensePlateNumber:
           type: string
           description: Primary key
                     
