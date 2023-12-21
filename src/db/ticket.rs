@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use bson::{oid::ObjectId, doc};
 use futures::StreamExt;
 
@@ -50,7 +52,7 @@ impl DB {
             .await?;
 
         let parking_space = self
-            .get_new_parking_space_by_licence_number(&body.vehicle_licence_number, &parking_lot.id)
+            .get_new_parking_space_by_license_number(&body.vehicle_license_number, &parking_lot.id)
             .await?;
 
         println!("parking_space: {:?}", parking_space);
@@ -59,7 +61,7 @@ impl DB {
         let ticket = Ticket {
             _id: ticket_id,
             user_id: body.user_id.to_owned(),
-            vehicle_licence_number: body.vehicle_licence_number.to_owned(),
+            vehicle_license_number: body.vehicle_license_number.to_owned(),
             issue_timestamp: chrono::Utc::now().timestamp(),
             end_timestamp: 0,
             amount_paid: 0.0,
@@ -115,32 +117,52 @@ impl DB {
     }
 
     pub async fn update_ticket(&self, ticket: &Ticket, parking_space: &ParkingSpace) -> Result<TicketResponse> {
-        let filter = doc! { "_id": ticket._id.to_owned() };
+        let filter = doc! { "_id": ticket._id.clone() };
 
         // TODO get ticket's tariff
         // TODO calculate amount paid
-        let amount_paid = 1.0;
+        let amount_paid = 1.0 + parking_space.price_modifier;
+        let end_timestamp = chrono::Utc::now().timestamp();
         let update = doc! { 
             "$set": { 
-                "end_timestamp": chrono::Utc::now().timestamp(), 
-                "amount_paid": amount_paid + parking_space.price_modifier 
+                "end_timestamp": end_timestamp,
+                "amount_paid": amount_paid,
         }};
 
-        let ticket = self
+        self
             .ticket_collection
-            .find_one_and_update(filter, update, None)
+            .update_one(filter, update, None)
             .await
             .map_err(MongoQueryError)?;
+
+
+        let ticket = self
+            .get_ticket_by_id(&ticket._id.to_hex())
+            .await;
 
         println!("ticket: {:?}", ticket);
 
         self.toggle_occupied_parking_space(&parking_space._id.to_hex()).await?;
 
-        self.transfer_balance(&ticket.clone().unwrap().user_id, amount_paid).await?;
+        self.transfer_balance(&ticket.as_ref().unwrap().user_id, amount_paid).await?;
 
         match ticket {
-            Some(ticket) => Ok(self.doc_to_ticket(&ticket)?),
-            None => Err(MongoNotFound(format!("ticket with code: {}", ticket.unwrap().code))),
+            Ok(ticket) => Ok(self.doc_to_ticket(&ticket)?),
+            Err(_) => Err(MongoNotFound(format!("ticket with code: {}", ticket.unwrap().code))),
+        }
+    }
+
+    pub async fn get_ticket_by_id(&self, id: &str) -> Result<Ticket> {
+        let filter = doc! { "_id": ObjectId::from_str(id).unwrap() };
+        let ticket = self
+            .ticket_collection
+            .find_one(filter, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        match ticket {
+            Some(ticket) => Ok(ticket),
+            None => Err(MongoNotFound(format!("ticket with id: {}", id))),
         }
     }
 
@@ -148,7 +170,7 @@ impl DB {
         let ticket_response = TicketResponse {
             id: ticket._id.to_hex(),
             user_id: ticket.user_id.to_owned(),
-            vehicle_licence_number: ticket.vehicle_licence_number.to_owned(),
+            vehicle_license_number: ticket.vehicle_license_number.to_owned(),
             issue_timestamp: ticket.issue_timestamp,
             end_timestamp: ticket.end_timestamp,
             amount_paid: ticket.amount_paid,

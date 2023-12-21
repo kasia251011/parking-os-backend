@@ -55,7 +55,7 @@ impl DB {
         Ok("Successful operation".to_string())
     }
 
-    pub async fn get_new_parking_space_by_licence_number(&self, licence_number: &str, parking_lot_id: &str) -> Result<ParkingSpace> {
+    pub async fn get_new_parking_space_by_license_number(&self, licence_number: &str, parking_lot_id: &str) -> Result<ParkingSpace> {
         let vehicle_type: &str = match licence_number.as_bytes()[0] {
             b'A' => "Truck",
             _ => "Car",

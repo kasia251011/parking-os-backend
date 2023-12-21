@@ -72,7 +72,7 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/parking-lots/:id", get(get_parking))
         .route("/vehicles", get(get_vehicles).post(create_vehicle))
         .route("/tickets", get(get_tickets).post(create_ticket))
-        .route("/tickets/", put(put_ticket))
+        .route("/tickets/:code", put(put_ticket))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))
