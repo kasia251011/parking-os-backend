@@ -13,10 +13,26 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn fetch_tickets(&self) -> Result<Vec<TicketResponse>> {
+    pub async fn fetch_tickets(&self, user_id: &str, active: bool) -> Result<Vec<TicketResponse>> {
+        let user_id_query = if user_id.is_empty() {
+            doc! { "$ne": "" }
+        } else {
+            doc! { "$eq": user_id }
+        };
+    
+        let end_timestamp_query = if active {
+            doc! { "$eq": 0 }
+        } else {
+            doc! { "$ne": 0 }
+        };
+    
+        let filter = doc! {
+            "user_id": user_id_query,
+            "end_timestamp": end_timestamp_query,
+        };
         let mut cursor = self
             .ticket_collection
-            .find(None, None)
+            .find(filter, None)
             .await
             .map_err(MongoQueryError)?;
     

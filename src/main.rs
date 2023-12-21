@@ -23,7 +23,7 @@ use handlers::{
     common::handler_404,
     sample::{create_sample_user, root},
     users::{create_user, get_users}, 
-    parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code},
+    parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code, get_parking},
     vehicle::{create_vehicle, get_vehicles}, 
     ticket::{get_tickets, create_ticket, put_ticket},
 };
@@ -69,6 +69,7 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/parking-lots", get(get_parkings).post(create_parking))
         .route("/parking-lots/:id/code", get(generate_parking_lot_code))
         .route("/parking-lots/", get(get_parking_by_code))
+        .route("/parking-lots/:id", get(get_parking))
         .route("/vehicles", get(get_vehicles).post(create_vehicle))
         .route("/tickets", get(get_tickets).post(create_ticket))
         .route("/tickets/", put(put_ticket))

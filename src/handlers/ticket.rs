@@ -4,19 +4,20 @@ use axum::extract::Query;
 use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
 use crate::AppState;
-use crate::structs::query::QueryTicketCode;
+use crate::structs::query::{QueryTicketCode, QueryTicket};
 use crate::structs::{
     error::MyError,
     schema::*,
 };
 
 pub async fn get_tickets(
+    Query(QueryTicket { user_id, active} ): Query<QueryTicket>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> 
 {
     match app_state
         .db
-        .fetch_tickets()
+        .fetch_tickets(&user_id, active)
         .await
         .map_err(MyError::from)
     {
