@@ -252,6 +252,24 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ParkingLot"
+    post:
+      tags:
+        - parking lots
+      summary: Add a new parking lot
+      description: Add a new parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: addParkingLot
+      requestBody:
+        description: Create a new parking lot
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParkingLotCreateSchema"
+        required: true
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Invalid input
   /parking-lots/{id}:
     get:
       tags:
@@ -274,32 +292,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ParkingLot"
-    post:
-      tags:
-        - parking lots
-      summary: Add a new parking lot
-      description: Add a new parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
-      operationId: addParkingLot
-      parameters:
-        - name: id
-          in: path
-          description: Parking lot id
-          required: true
-          explode: false
-          schema:
-            type: string
-      requestBody:
-        description: Create a new parking lot
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ParkingLotCreateSchema"
-        required: true
-      responses:
-        "201":
-          description: Successful operation
-        "400":
-          description: Invalid input
   /parking-lots/{id}/levels:
     get:
       tags:
@@ -697,4 +689,3 @@ components:
         pricePerHour:
           type: number
           description: Price per hour
-
