@@ -176,6 +176,8 @@ paths:
           description: Successful operation
         "400":
           description: Invalid input
+        "410":
+          description: No parking space avilable
   /tickets/{code}:
     put:
       tags:
@@ -200,6 +202,10 @@ paths:
                 $ref: "#/components/schemas/Ticket"
         "400":
           description: Invalid code
+        "401":
+          description: Insufficient funds
+        "402":
+          description: 
   /parking-lots/{id}/code:
     get:
       tags:
@@ -691,3 +697,4 @@ components:
         pricePerHour:
           type: number
           description: Price per hour
+
