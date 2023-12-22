@@ -105,6 +105,48 @@ paths:
           schema:
             type: boolean
             examples: ["true"]
+        - name: vehicleLicenseNumber
+          in: query
+          description: Vehicle license number
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: parkingSpotId
+          in: query
+          description: Id of parking spot 
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: issueTimestamp
+          in: query
+          description: Date of issue
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: endTimestamp
+          in: query
+          description: Date of end
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: level
+          in: query
+          description: Level of parking lot (only passed if parkingLotId is)
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: parkingLotId
+          in: query
+          description: Parking lot id
+          required: false
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: successful operation
@@ -210,6 +252,24 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ParkingLot"
+    post:
+      tags:
+        - parking lots
+      summary: Add a new parking lot
+      description: Add a new parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: addParkingLot
+      requestBody:
+        description: Create a new parking lot
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParkingLotCreateSchema"
+        required: true
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Invalid input
   /parking-lots/{id}:
     get:
       tags:
@@ -232,12 +292,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ParkingLot"
-    post:
+  /parking-lots/{id}/levels:
+    get:
       tags:
         - parking lots
-      summary: Add a new parking lot
-      description: Add a new parking lot <br> Allowed roles<span>&#58;</span>  ```ADMIN```
-      operationId: addParkingLot
+      summary: Get parking lot levels by parking id
+      description: Provides array with all parking lot levels <br> Allowed roles<span>&#58;</span>  ```ADMIN```, ```USER```
+      operationId: getParkingLotLevelsById
       parameters:
         - name: id
           in: path
@@ -246,19 +307,133 @@ paths:
           explode: false
           schema:
             type: string
-      requestBody:
-        description: Create a new parking lot
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ParkingLotCreateSchema"
-        required: true
       responses:
-        "201":
-          description: Successful operation
-        "400":
-          description: Invalid input
-
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Level"
+  /parking-lots/{id}/income:
+    get:
+      tags:
+        - parking lots
+      summary: Get parking lot levels by parking id
+      description: Provides array with parking lot income stats <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: getParkingLotIncomeById
+      parameters:
+        - name: id
+          in: path
+          description: Parking lot id
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncomeStats'
+  /parking-lots/{parkingLotId}/parking-spots:
+    get:
+      tags:
+        - parking spots
+      summary: Get parking spots
+      description: Provides array with all parking spots <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: getParkingSpots
+      parameters:
+        - name: parkingLotId
+          in: path
+          description: Parking lot id
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Level number
+          required: true
+          explode: false
+          schema:
+            type: number
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ParkingSpot"
+  /parking-lots/{parkingLotId}/parking-spots/{id}/income:
+    get:
+      tags:
+        - parking spots
+      summary: Get parking spot income
+      description: Provides array with parking spot income <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: getParkingSpotIncome
+      parameters:
+        - name: parkingLotId
+          in: path
+          description: Parking lot id
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Parking spot Id
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  stats:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IncomeStats'
+                  today:
+                    type: number
+                  now:
+                    type: number
+                    description: If sopt is not occupied value is 0
+  /parking-lots/{id}/tariffs:
+    get:
+      tags:
+        - parking lots
+      summary: Get parking let tariffs
+      description: Provides array with all parking lot tariffs <br> Allowed roles<span>&#58;</span>  ```ADMIN```,  ```USER```
+      operationId: getParkingLotTariff
+      parameters:
+        - name: id
+          in: path
+          description: Parking lot id
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tariff'
 components:
   schemas:
     User:
@@ -291,10 +466,10 @@ components:
           description: User table foregin key
         vehicleLicenseNumber:
           type: string
-          description: Vehicle table foregin key
-        parkingSpaceId:
+          description: Vehicle id
+        parkingSpotId:
           type: string
-          description: Parking space foregin key
+          description: Parking spot id
         issueTimestamp:
           type: integer
           format: timestamp
@@ -306,16 +481,13 @@ components:
         amountPaid:
           type: number
           format: float
-          description: Amount of money in PLN
-        spotNumber:
-          type: integer
-          description: NNumber of parking spot identifiable by a user
+          description: Amount of money
         level:
           type: integer
           description: Parking lot level of the parking spot
         parkingLotId:
           type: string
-          description: Parking lot table foregin key
+          description: Parking lot id
         code:
           type: string
           description: Access code (this field will be here until GET me/ticket doesn't exist)
@@ -377,6 +549,11 @@ components:
                 type: number
               trucks:
                 type: number
+        tariffs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tariff"
+                
     ParkingLot:
       type: object
       properties:
@@ -419,6 +596,7 @@ components:
         noLevels:
           type: integer
           description: Indicator of parking lot level, can be negative
+        
     Vehicle:
       type: object
       properties:
@@ -440,4 +618,74 @@ components:
         licensePlateNumber:
           type: string
           description: Primary key
-                    
+    ParkingSpot:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Parking space id
+        parkingLotId:
+          type: string
+          description: Parking lot Id
+        level:
+          type: number
+          description: Number of level
+        ordinalNumber:
+          type: number
+          description: Ordinal number of spot in level
+        vehicleType:
+          type: string
+          description: Vehicle type of this spot
+          enum:
+            - CAR
+            - TRUCK
+        isOccupied:
+          type: boolean
+          description: Primary key
+    Level:
+      type: object
+      properties:
+        truck:
+          type: object
+          description: Parking space id
+          properties:
+            spotsOccupied:
+              type: number
+              description: Number of occupied truck spots in level
+            spotsFree:
+              type: number
+              description: Number of free truck spots in level
+        car:
+          type: object
+          description: Parking space id
+          properties:
+            spotsOccupied:
+              type: number
+              description: Number of occupied car spots in level
+            spotsFree:
+              type: number
+              description: Number of free car spots in level
+    IncomeStats:
+      type: object
+      properties:
+        month:
+          type: string
+          description: Name on calculated month
+          examples: ["January"]
+        income:
+          type: number
+          description: Income in specified month
+    Tariff:
+      type: object
+      properties:
+        parkingLotId:
+          type: string
+        maxTime:
+          type: number
+          description: Min hours of stop on this tariff
+        minTime:
+          type: number
+          description: Max hours of stop on this tariff
+        pricePerHour:
+          type: number
+          description: Price per hour
