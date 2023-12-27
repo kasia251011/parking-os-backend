@@ -17,3 +17,8 @@ pub struct QueryTicket {
     #[serde(default)]
     pub active: bool,
 }
+
+#[derive(Deserialize)]
+pub struct QueryParkingSpaceCode {
+    pub level: u32,
+}

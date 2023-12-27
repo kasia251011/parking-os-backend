@@ -5,8 +5,8 @@ use futures::StreamExt;
 
 use crate::structs::{
     error::MyError::{*, self}, 
-    model::ParkingSpace, 
-    schema::CreateParkingSpaceSchema,
+    model::{ParkingSpace, VehicleType}, 
+    schema::CreateParkingSpaceSchema, response::ParkingSpaceResponse,
 };
 
 use super::common::DB;
@@ -148,5 +148,37 @@ impl DB {
             Some(parking_space) => Ok(parking_space),
             None => Err(NotFoundError(format!("parking_space with spot_name: {}", spot_name))),
         }
+    }
+
+    pub async fn get_parking_spaces_by_parking_lot_id(&self, parking_lot_id: &str, level: u32) -> Result<Vec<ParkingSpaceResponse>> {
+        let mut cursor = self
+            .parking_space_collection
+            .find(
+                doc! {
+                    "parking_lot_id": ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?,
+                    "location.no_level": level,
+                },
+                None,
+            )
+            .await
+            .map_err(MongoQueryError)?;
+
+        let mut json_result: Vec<ParkingSpaceResponse> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            let parking_space: ParkingSpace = doc.unwrap();
+            json_result.push(ParkingSpaceResponse {
+                id: parking_space._id.to_hex(),
+                parking_lot_id: parking_space.parking_lot_id.to_hex(),
+                level: parking_space.location.no_level,
+                ordinal_number: parking_space.location.no_space,
+                vehicle_type: match parking_space.vehicle_type {
+                    VehicleType::Car => "Car".to_string(),
+                    VehicleType::Truck => "Truck".to_string(),
+                },
+                is_occupied: parking_space.occupied,
+            });
+        }
+
+        Ok(json_result)
     }
 }

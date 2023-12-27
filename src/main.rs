@@ -27,6 +27,7 @@ use handlers::{
     vehicle::{create_vehicle, get_vehicles}, 
     ticket::{get_tickets, create_ticket, put_ticket},
     tariff::{get_tariffs, create_tariff},
+    parking_space::get_parking_spaces_by_parking_lot_id,
 };
 use db::common::DB;
 
@@ -75,6 +76,7 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/tickets", get(get_tickets).post(create_ticket))
         .route("/tickets/:code", put(put_ticket))
         .route("/tariffs", get(get_tariffs).post(create_tariff))
+        .route("/parking-lots/:id/parking-spots", get(get_parking_spaces_by_parking_lot_id))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         // don't allow request bodies larger than 1024 bytes, returning 413 status code
         .layer(RequestBodyLimitLayer::new(1024))
