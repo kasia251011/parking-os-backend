@@ -48,3 +48,15 @@ pub struct CreateTicketSchema {
     #[serde(rename = "parkingLotId")]
     pub parking_lot_id: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CreateTariffSchema {
+    #[serde(rename = "parkingLotId")]
+    pub parking_lot_id: String,
+    #[serde(rename = "minTime")]
+    pub min_time: i64,
+    #[serde(rename = "maxTime")]
+    pub max_time: i64,
+    #[serde(rename = "pricePerHour")]
+    pub price_per_hour: f64,
+}
