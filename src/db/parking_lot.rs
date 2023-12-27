@@ -6,7 +6,7 @@ use futures::StreamExt;
 use crate::structs::{
     error::MyError::{*, self}, 
     model::{ParkingLot, ParkingLocation, VehicleType},
-    response::ParkingLotResponse, 
+    response::{ParkingLotResponse, ParkingLotStatsResponse, ParkingLotStats}, 
     schema::{CreateParkingSchema, CreateParkingSpaceSchema},  
 };
 
@@ -111,6 +111,74 @@ impl DB {
             Some(doc) => Ok(self.doc_to_parking(&doc)?),
             None => Err(NotFoundError(parking_lot_id.to_string()))
         }
+    }
+
+    pub async fn get_parking_lot_levels_by_id(&self, parking_lot_id: &str) -> Result<Vec<ParkingLotStatsResponse>> {
+        let parking_spaces = self
+            .fetch_parking_spaces()
+            .await?
+            .into_iter()
+            .filter(|parking_space| parking_space.parking_lot_id == ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned())).unwrap())
+            .collect::<Vec<_>>();
+
+        let mut parking_lot_stats: Vec<ParkingLotStatsResponse> = Vec::new();
+        for parking_space in parking_spaces {
+            let index = parking_space.location.no_level as usize;
+            let occupied = parking_space.occupied;
+            match parking_lot_stats.get_mut(index) {
+                Some(parking_lot_stat) => {
+                    match parking_space.vehicle_type {
+                        VehicleType::Car => {
+                            if !occupied {
+                                parking_lot_stat.car.spots_free += 1;
+                            } else {
+                                parking_lot_stat.car.spots_occupied += 1;
+                            }
+                        }
+                        VehicleType::Truck => {
+                            if !occupied {
+                                parking_lot_stat.truck.spots_free += 1;
+                            } else {
+                                parking_lot_stat.truck.spots_occupied += 1;
+                            }
+                        }
+                    }
+                },
+                None => {
+                    let mut parking_lot_stat = ParkingLotStatsResponse {
+                        truck: ParkingLotStats {
+                            spots_occupied: 0,
+                            spots_free: 0,
+                        },
+                        car: ParkingLotStats {
+                            spots_occupied: 0,
+                            spots_free: 0,
+                        },
+                    };
+                    match parking_space.vehicle_type {
+                        VehicleType::Car => {
+                            if !occupied {
+                                parking_lot_stat.car.spots_free += 1;
+                            } else {
+                                parking_lot_stat.car.spots_occupied += 1;
+                            }
+                        }
+                        VehicleType::Truck => {
+                            if !occupied {
+                                parking_lot_stat.truck.spots_free += 1;
+                            } else {
+                                parking_lot_stat.truck.spots_occupied += 1;
+                            }
+                        
+                        }
+                    }
+                    parking_lot_stats.push(parking_lot_stat);
+                }
+
+            }
+        }
+
+        Ok(parking_lot_stats)
     }
 
     pub async fn get_parking_lot_by_code(&self, code: &str) -> Result<ParkingLotResponse> {
