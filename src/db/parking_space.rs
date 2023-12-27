@@ -1,12 +1,13 @@
 use std::str::FromStr;
 
 use bson::{oid::ObjectId, doc};
+use chrono::{Datelike, DateTime, TimeZone, Utc};
 use futures::StreamExt;
 
 use crate::structs::{
     error::MyError::{*, self}, 
-    model::{ParkingSpace, VehicleType}, 
-    schema::CreateParkingSpaceSchema, response::ParkingSpaceResponse,
+    model::{ParkingSpace, VehicleType, Ticket}, 
+    schema::CreateParkingSpaceSchema, response::{ParkingSpaceResponse, IncomeStatsResponse, IncomeStats},
 };
 
 use super::common::DB;
@@ -180,5 +181,94 @@ impl DB {
         }
 
         Ok(json_result)
+    }
+
+    pub async fn get_parking_space_income(&self, parking_lot_id: &str, parking_space_id: &str) -> Result<IncomeStatsResponse> {
+        let parking_space = self
+            .fetch_parking_spaces()
+            .await?
+            .into_iter()
+            .find(|parking_space| {
+                parking_space.parking_lot_id == ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned())).unwrap()
+                    && parking_space._id == ObjectId::from_str(parking_space_id).map_err(|_| InvalidIDError(parking_space_id.to_owned())).unwrap()
+            });
+
+        let parking_space = match parking_space {
+            Some(parking_space) => parking_space,
+            None => return Err(NotFoundError(format!("parking_space with id: {}", parking_space_id))),
+        };
+
+        let mut cursor = self
+            .ticket_collection
+            .find(
+                doc! {
+                    "parking_lot_id": parking_lot_id.to_owned(),
+                    "spot_name": parking_space.location.no_space.to_string(),
+                    "level": parking_space.location.no_level,
+                },
+                None,
+            )
+            .await
+            .map_err(MongoQueryError)?;
+
+        println!("parking_space: {:?}", parking_space);
+        println!("cursor: {:?}", cursor.next().await);
+
+        let mut json_result: Vec<IncomeStats> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            let ticket: Ticket = doc.unwrap();
+            let issue_timestamp = chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap();
+            let date_time = Utc.from_utc_datetime(&issue_timestamp).month();
+            let month = match date_time {
+                1 => "January",
+                2 => "February",
+                3 => "March",
+                4 => "April",
+                5 => "May",
+                6 => "June",
+                7 => "July",
+                8 => "August",
+                9 => "September",
+                10 => "October",
+                11 => "November",
+                _ => "December",
+            }.to_string();
+
+            let income = ticket.amount_paid;
+            if let Some(stats) = json_result.iter_mut().find(|stats| stats.month == month) {
+                stats.income += income;
+            } else {
+                json_result.push(IncomeStats {
+                    month,
+                    income,
+                });
+            }
+        }
+        println!("json_result: {:?}", json_result);
+
+        let mut today_income = 0.0;
+        let mut now_income = 0.0;
+        let today_date_time = Utc::now();  
+        while let Some(doc) = cursor.next().await {
+            let ticket: Ticket = doc.unwrap();
+            let end_timestamp = DateTime::<Utc>::from_utc(chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap(), Utc);
+            let diff = today_date_time.signed_duration_since(end_timestamp);
+            let days = diff.num_days();
+
+            if days == 0 && days/30 == 0 && days/365 == 0 {
+                let amount_paid = ticket.amount_paid;
+                if ticket.end_timestamp == 0 {
+                    now_income += amount_paid;
+                }
+
+                today_income += amount_paid;
+            }
+        }
+
+        Ok(IncomeStatsResponse {
+            stats: json_result,
+            today: today_income,
+            now: now_income,
+        })
     }
 }

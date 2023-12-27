@@ -79,3 +79,16 @@ pub struct ParkingSpaceResponse {
     #[serde(rename = "isOccupied")]
     pub is_occupied: bool,
 }
+
+#[derive(Serialize, Debug)]
+pub struct IncomeStatsResponse {
+    pub stats: Vec<IncomeStats>,
+    pub today: f64,
+    pub now: f64,
+}
+
+#[derive(Serialize, Debug)]
+pub struct IncomeStats {
+    pub month: String,
+    pub income: f64,
+}
