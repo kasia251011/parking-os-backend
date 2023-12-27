@@ -23,10 +23,10 @@ use handlers::{
     common::handler_404,
     sample::{create_sample_user, root},
     users::{create_user, get_users}, 
-    parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code, get_parking},
+    parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code, get_parking, get_parking_lot_levels, get_parking_lot_income},
     vehicle::{create_vehicle, get_vehicles}, 
     ticket::{get_tickets, create_ticket, put_ticket},
-    tariff::{get_tariffs, create_tariff},
+    tariff::{get_tariffs, create_tariff, get_tariffs_by_parking_lot_id},
     parking_space::{get_parking_spaces_by_parking_lot_id, get_parking_space_income},
 };
 use db::common::DB;
@@ -72,6 +72,9 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/parking-lots/:id/code", get(generate_parking_lot_code))
         .route("/parking-lots/", get(get_parking_by_code))
         .route("/parking-lots/:id", get(get_parking))
+        .route("/parking-lots/:id/levels", get(get_parking_lot_levels))
+        .route("/parking-lots/:id/tariffs", get(get_tariffs_by_parking_lot_id))
+        .route("/parking-lots/:id/income", get(get_parking_lot_income))
         .route("/vehicles", get(get_vehicles).post(create_vehicle))
         .route("/tickets", get(get_tickets).post(create_ticket))
         .route("/tickets/:code", put(put_ticket))

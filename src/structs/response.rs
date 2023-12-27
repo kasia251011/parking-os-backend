@@ -92,3 +92,17 @@ pub struct IncomeStats {
     pub month: String,
     pub income: f64,
 }
+
+#[derive(Serialize, Debug)]
+pub struct ParkingLotStatsResponse {
+    pub truck: ParkingLotStats,
+    pub car: ParkingLotStats,
+}
+
+#[derive(Serialize, Debug)]
+pub struct ParkingLotStats {
+    #[serde(rename = "spotsOccupied")]
+    pub spots_occupied: u32,
+    #[serde(rename = "spotsFree")]
+    pub spots_free: u32,
+}
