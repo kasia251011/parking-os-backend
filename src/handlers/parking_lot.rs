@@ -57,6 +57,22 @@ pub async fn get_parking_lot_levels(
     }
 }
 
+pub async fn get_parking_lot_income(
+    Path(parking_lot_id): Path<String>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> 
+{
+    match app_state
+        .db
+        .get_parking_lot_income(&parking_lot_id)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => Ok(Json(res)),
+        Err(e) => Err(e.into()),
+    }
+}
+
 pub async fn create_parking(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<CreateParkingSchema>,

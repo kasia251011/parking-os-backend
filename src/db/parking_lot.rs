@@ -1,12 +1,13 @@
 use std::str::FromStr;
 
 use bson::{oid::ObjectId, doc};
+use chrono::{Utc, TimeZone, Datelike};
 use futures::StreamExt;
 
 use crate::structs::{
     error::MyError::{*, self}, 
-    model::{ParkingLot, ParkingLocation, VehicleType},
-    response::{ParkingLotResponse, ParkingLotStatsResponse, ParkingLotStats}, 
+    model::{ParkingLot, ParkingLocation, VehicleType, Ticket},
+    response::{ParkingLotResponse, ParkingLotStatsResponse, ParkingLotStats, IncomeStats}, 
     schema::{CreateParkingSchema, CreateParkingSpaceSchema},  
 };
 
@@ -188,5 +189,51 @@ impl DB {
             Some(doc) => Ok(doc),
             None => Err(NotFoundError(code.to_string()))
         }
+    }
+
+    pub async fn get_parking_lot_income(&self, parking_lot_id: &str) -> Result<Vec<IncomeStats>> {
+        let mut cursor = self
+            .ticket_collection
+            .find(
+                doc! {
+                    "parking_lot_id": parking_lot_id.to_owned(),
+                },
+                None,
+            )
+            .await
+            .map_err(MongoQueryError)?;
+
+        let mut json_result: Vec<IncomeStats> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            let ticket: Ticket = doc.unwrap();
+            let issue_timestamp = chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap();
+            let date_time = Utc.from_utc_datetime(&issue_timestamp).month();
+            let month = match date_time {
+                1 => "January",
+                2 => "February",
+                3 => "March",
+                4 => "April",
+                5 => "May",
+                6 => "June",
+                7 => "July",
+                8 => "August",
+                9 => "September",
+                10 => "October",
+                11 => "November",
+                _ => "December",
+            }.to_string();
+
+            let income = ticket.amount_paid;
+            if let Some(stats) = json_result.iter_mut().find(|stats| stats.month == month) {
+                stats.income += income;
+            } else {
+                json_result.push(IncomeStats {
+                    month,
+                    income,
+                });
+            }
+        }
+        println!("json_result: {:?}", json_result);    
+        Ok(json_result)
     }
 }
