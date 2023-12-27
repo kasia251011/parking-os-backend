@@ -65,3 +65,30 @@ pub struct TariffResponse {
     #[serde(rename = "pricePerHour")]
     pub price_per_hour: f64,
 }
+
+#[derive(Serialize, Debug)]
+pub struct ParkingSpaceResponse {
+    pub id: String,
+    #[serde(rename = "parkingLotId")]
+    pub parking_lot_id: String,
+    pub level: u32,
+    #[serde(rename = "ordinalNumber")]
+    pub ordinal_number: u32,
+    #[serde(rename = "vehicleType")]
+    pub vehicle_type: String,
+    #[serde(rename = "isOccupied")]
+    pub is_occupied: bool,
+}
+
+#[derive(Serialize, Debug)]
+pub struct IncomeStatsResponse {
+    pub stats: Vec<IncomeStats>,
+    pub today: f64,
+    pub now: f64,
+}
+
+#[derive(Serialize, Debug)]
+pub struct IncomeStats {
+    pub month: String,
+    pub income: f64,
+}
