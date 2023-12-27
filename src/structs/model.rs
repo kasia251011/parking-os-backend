@@ -90,6 +90,7 @@ pub struct ParkingLocation {
 pub struct Tariff {
     pub _id: ObjectId,
     pub parking_lot_id: String,
-    pub maximum_time: f64,
+    pub min_time: i64,
+    pub max_time: i64,
     pub price_per_hour: f64,
 }

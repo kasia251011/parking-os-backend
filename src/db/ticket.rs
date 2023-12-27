@@ -119,10 +119,24 @@ impl DB {
     pub async fn update_ticket(&self, ticket: &Ticket, parking_space: &ParkingSpace) -> Result<TicketResponse> {
         let filter = doc! { "_id": ticket._id.clone() };
 
-        // TODO get ticket's tariff
-        // TODO calculate amount paid
-        let amount_paid = 1.0 + parking_space.price_modifier;
+        let tariffs = self
+            .get_tariffs_by_parking_lot_id_ascending(&ticket.parking_lot_id)
+            .await?;
+
+        let mut amount_paid = 0.0;
         let end_timestamp = chrono::Utc::now().timestamp();
+        let total_time = (end_timestamp - ticket.issue_timestamp) / 36000 + 1;
+        while let Some(tariff) = tariffs.iter().next() {
+            if total_time >= tariff.min_time && total_time <= tariff.max_time {
+                amount_paid = parking_space.price_modifier * tariff.price_per_hour * total_time as f64;
+                break;
+            }
+        }
+
+        if amount_paid == 0.0 {
+            amount_paid = parking_space.price_modifier * tariffs.last().unwrap().price_per_hour * total_time as f64;
+        }
+        
         let update = doc! { 
             "$set": { 
                 "end_timestamp": end_timestamp,
