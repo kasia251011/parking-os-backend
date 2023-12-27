@@ -126,24 +126,8 @@ impl DB {
             let index = parking_space.location.no_level as usize;
             let occupied = parking_space.occupied;
             match parking_lot_stats.get_mut(index) {
-                Some(parking_lot_stat) => {
-                    match parking_space.vehicle_type {
-                        VehicleType::Car => {
-                            if !occupied {
-                                parking_lot_stat.car.spots_free += 1;
-                            } else {
-                                parking_lot_stat.car.spots_occupied += 1;
-                            }
-                        }
-                        VehicleType::Truck => {
-                            if !occupied {
-                                parking_lot_stat.truck.spots_free += 1;
-                            } else {
-                                parking_lot_stat.truck.spots_occupied += 1;
-                            }
-                        }
-                    }
-                },
+                Some(parking_lot_stat) => 
+                    self.add_new_stat_occupied_space(parking_lot_stat, parking_space.vehicle_type, occupied),
                 None => {
                     let mut parking_lot_stat = ParkingLotStatsResponse {
                         truck: ParkingLotStats {
@@ -155,30 +139,33 @@ impl DB {
                             spots_free: 0,
                         },
                     };
-                    match parking_space.vehicle_type {
-                        VehicleType::Car => {
-                            if !occupied {
-                                parking_lot_stat.car.spots_free += 1;
-                            } else {
-                                parking_lot_stat.car.spots_occupied += 1;
-                            }
-                        }
-                        VehicleType::Truck => {
-                            if !occupied {
-                                parking_lot_stat.truck.spots_free += 1;
-                            } else {
-                                parking_lot_stat.truck.spots_occupied += 1;
-                            }
-                        
-                        }
-                    }
+                    self.add_new_stat_occupied_space(&mut parking_lot_stat, parking_space.vehicle_type, occupied);
                     parking_lot_stats.push(parking_lot_stat);
                 }
-
             }
         }
 
         Ok(parking_lot_stats)
+    }
+
+    fn add_new_stat_occupied_space(&self, parking_lot_stat: &mut ParkingLotStatsResponse, vehicle_type: VehicleType, occupied: bool) {
+        match vehicle_type {
+            VehicleType::Car => {
+                if !occupied {
+                    parking_lot_stat.car.spots_free += 1;
+                } else {
+                    parking_lot_stat.car.spots_occupied += 1;
+                }
+            }
+            VehicleType::Truck => {
+                if !occupied {
+                    parking_lot_stat.truck.spots_free += 1;
+                } else {
+                    parking_lot_stat.truck.spots_occupied += 1;
+                }
+            
+            }
+        }
     }
 
     pub async fn get_parking_lot_by_code(&self, code: &str) -> Result<ParkingLotResponse> {
