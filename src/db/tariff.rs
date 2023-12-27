@@ -50,14 +50,12 @@ impl DB {
     }
 
     pub async fn get_tariffs_by_parking_lot_id_ascending(&self, parking_lot_id: &str) -> Result<Vec<TariffResponse>> {
-        let filter = doc! { 
-            "parking_lot_id": parking_lot_id,
-            "$sort": { "min_time": 1 }
-        };
+        let filter = doc! { "parking_lot_id": parking_lot_id };
+        let options = mongodb::options::FindOptions::builder().sort(doc! { "min_time": 1 }).build();
 
         let mut cursor = self
             .tariff_collection
-            .find(filter, None)
+            .find(filter, options)
             .await
             .map_err(MongoQueryError)?;
 
