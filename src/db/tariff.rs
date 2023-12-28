@@ -34,6 +34,8 @@ impl DB {
             price_per_hour: body.price_per_hour,
         };
 
+        println!("{:?}", tariff);
+
         match self.tariff_collection.insert_one(tariff, None).await {
             Ok(result) => result,
             Err(e) => {
