@@ -552,7 +552,18 @@ components:
         tariffs:
           type: array
           items:
-            $ref: "#/components/schemas/Tariff"
+            type: object
+            description: description of tariffs (cannot be empty)
+            properties:
+              maxTime:
+                type: number
+                description: Min hours of stop on this tariff
+              minTime:
+                type: number
+                description: Max hours of stop on this tariff
+              pricePerHour:
+                type: number
+                description: Price per hour
                 
     ParkingLot:
       type: object
