@@ -18,6 +18,7 @@ pub struct CreateParkingSchema {
     pub cost_of_maintenance: CostOfMaintenance,
     pub location: Location,
     pub levels: Vec<Levels>,
+    pub tariffs: Vec<CreateTariffSchema>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -51,8 +52,6 @@ pub struct CreateTicketSchema {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateTariffSchema {
-    #[serde(rename = "parkingLotId")]
-    pub parking_lot_id: String,
     #[serde(rename = "minTime")]
     pub min_time: i64,
     #[serde(rename = "maxTime")]
