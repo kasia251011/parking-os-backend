@@ -33,6 +33,8 @@ pub enum MyError {
     MongoNotFound(String),
     #[error("Not enough balance: {0}")]
     NotEnoughBalanceError(String),
+    #[error("Vehicle not found: {0}")]
+    VehicleNotFoundError(String),
 }
 
 #[derive(Serialize)]
@@ -147,6 +149,13 @@ impl Into<(axum::http::StatusCode, Json<serde_json::Value>)> for MyError {
                 ErrorResponse {
                     status: "400",
                     message: format!("Not enough balance: {}", message),
+                },
+            ),
+            MyError::VehicleNotFoundError(message) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("Vehicle not found: {}", message),
                 },
             ),
         };

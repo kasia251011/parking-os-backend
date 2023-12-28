@@ -81,7 +81,29 @@ paths:
       responses:
         "200":
           description: successful operation
-          
+  
+  /vehicles/{licensePlateNumber}:
+    get:
+      tags:
+        - vehicles
+      summary: Get vehicle by license plate number
+      description: Provides vehicle with specified license plate number <br> Allowed roles<span>&#58;</span>  ```ADMIN``` ```USER```
+      operationId: getVehicleByLicensePlateNumber
+      parameters:
+        - name: licensePlateNumber
+          in: path
+          description: License plate number
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
   /tickets:
     get:
       tags:
