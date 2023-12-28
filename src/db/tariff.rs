@@ -15,20 +15,20 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn fetch_tariffs(&self) -> Result<Vec<TariffResponse>> {
-        let mut cursor = self
-            .tariff_collection
-            .find(None, None)
-            .await
-            .map_err(MongoQueryError)?;
+    // pub async fn fetch_tariffs(&self) -> Result<Vec<TariffResponse>> {
+    //     let mut cursor = self
+    //         .tariff_collection
+    //         .find(None, None)
+    //         .await
+    //         .map_err(MongoQueryError)?;
 
-        Ok(self.cursor_to_vec(&mut cursor).await?)
-    }
+    //     Ok(self.cursor_to_vec(&mut cursor).await?)
+    // }
 
-    pub async fn create_tariff(&self, body: &CreateTariffSchema) -> Result<String> {
+    pub async fn create_tariff(&self, body: &CreateTariffSchema, parking_lot_id: &str) -> Result<String> {
         let tariff = Tariff {
             _id: ObjectId::new(),
-            parking_lot_id: body.parking_lot_id.to_owned(),
+            parking_lot_id: parking_lot_id.to_owned(),
             min_time: body.min_time,
             max_time: body.max_time,
             price_per_hour: body.price_per_hour,

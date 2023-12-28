@@ -78,6 +78,10 @@ impl DB {
             }
         }
 
+        for tariff in &body.tariffs {
+            self.create_tariff(tariff, &new_parking_lot_id.to_hex()).await?;
+        }
+
         Ok("Successful operation".to_string())
     }
     
