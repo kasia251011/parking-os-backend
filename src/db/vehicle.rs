@@ -1,4 +1,4 @@
-use bson::oid::ObjectId;
+use bson::{oid::ObjectId, doc};
 use futures::StreamExt;
 
 use crate::structs::{
@@ -68,5 +68,15 @@ impl DB {
             model: vehicle.model.to_owned(),
             license_plate_number: vehicle.license_plate_number.to_owned(),
         })
+    }
+
+    pub async fn get_vehicle_by_license_plate_number(&self, license_plate_number: &str) -> Result<Vehicle> {
+        let filter = doc! { "license_plate_number": license_plate_number };
+        let vehicle = self.vehicle_collection.find_one(filter, None).await.map_err(MongoQueryError)?;
+
+        match vehicle {
+            Some(vehicle) => Ok(vehicle),
+            None => Err(VehicleNotFoundError(license_plate_number.to_owned())),
+        }
     }
 }
