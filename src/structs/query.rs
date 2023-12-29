@@ -16,6 +16,18 @@ pub struct QueryTicket {
     pub user_id: String,
     #[serde(default)]
     pub active: bool,
+    #[serde(rename = "parkingLotId", default = "String::new")]
+    pub vehicle_license_number: String,
+    #[serde(rename = "vehicleLicenseNumber", default = "String::new")]
+    pub parking_spot_id: String,
+    #[serde(rename = "issueTimeStamp", default)]
+    pub issue_time_stamp: u32,
+    #[serde(rename = "endTimeStamp", default)]
+    pub end_time_stamp: u32,
+    #[serde(default)]
+    pub level: u32,
+    #[serde(rename = "parkingLotId", default = "String::new")]
+    pub parking_lot_id: String,
 }
 
 #[derive(Deserialize)]

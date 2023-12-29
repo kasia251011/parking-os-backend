@@ -132,22 +132,21 @@ impl DB {
         Ok("Successful operation".to_string())
     }
 
-    pub async fn get_parking_space_by_location(&self, parking_lot_id: &str, spot_name: &str, level: u32) -> Result<ParkingSpace> {
+    pub async fn get_parking_space_by_parking_spot_id(&self, parking_lot_id: &str, parking_space_id: &str) -> Result<ParkingSpace> {
         let parking_space = self
             .fetch_parking_spaces()
             .await?
             .into_iter()
             .find(|parking_space| {
                 parking_space.parking_lot_id == ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned())).unwrap()
-                    && parking_space.location.no_space.to_string() == spot_name
-                    && parking_space.location.no_level == level
+                    && parking_space._id == ObjectId::from_str(parking_space_id).map_err(|_| InvalidIDError(parking_space_id.to_owned())).unwrap()
             });
 
         println!("parking_space: {:?}", parking_space);
 
         match parking_space {
             Some(parking_space) => Ok(parking_space),
-            None => Err(NotFoundError(format!("parking_space with spot_name: {}", spot_name))),
+            None => Err(NotFoundError(format!("parking_space with id: {}", parking_space_id))),
         }
     }
 

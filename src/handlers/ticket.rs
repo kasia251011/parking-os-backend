@@ -11,13 +11,13 @@ use crate::structs::{
 };
 
 pub async fn get_tickets(
-    Query(QueryTicket { user_id, active} ): Query<QueryTicket>,
+    Query(QueryTicket { user_id, active, vehicle_license_number, parking_spot_id, issue_time_stamp, end_time_stamp, level, parking_lot_id} ): Query<QueryTicket>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> 
 {
     match app_state
         .db
-        .fetch_tickets(&user_id, active)
+        .fetch_tickets(&user_id, active, &vehicle_license_number, &parking_spot_id, issue_time_stamp, end_time_stamp, level, &parking_lot_id)
         .await
         .map_err(MyError::from)
     {
