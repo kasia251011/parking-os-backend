@@ -15,22 +15,63 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn fetch_tickets(&self, user_id: &str, active: bool) -> Result<Vec<TicketResponse>> {
+    pub async fn fetch_tickets(&self, user_id: &str, active: bool, vehicle_license_number: &str, parking_spot_id: &str, 
+        issue_time_stamp: u32, end_time_stamp: u32, level: u32, parking_lot_id: &str
+    ) -> Result<Vec<TicketResponse>> {
         let user_id_query = if user_id.is_empty() {
             doc! { "$ne": "" }
         } else {
             doc! { "$eq": user_id }
         };
+
+        let vehicle_license_number_query = if vehicle_license_number.is_empty() {
+            doc! { "$ne": "" }
+        } else {
+            doc! { "$eq": vehicle_license_number }
+        };
+
+        let parking_spot_id_query = if parking_spot_id.is_empty() {
+            doc! { "$ne": "" }
+        } else {
+            doc! { "$eq": parking_spot_id }
+        };
+
+        let issue_time_stamp_query = if issue_time_stamp == 0 {
+            doc! { "$ne": 0 }
+        } else {
+            doc! { "$eq": issue_time_stamp }
+        };
     
         let end_timestamp_query = if active {
             doc! { "$eq": 0 }
         } else {
+            if end_time_stamp == 0 {
+                doc! { "$ne": 0 }
+            } else {
+                doc! { "$eq": end_time_stamp }
+            }
+        };
+
+        let level_query = if level == 0 {
             doc! { "$ne": 0 }
+        } else {
+            doc! { "$eq": level }
+        };
+
+        let parking_lot_id_query = if parking_lot_id.is_empty() {
+            doc! { "$ne": "" }
+        } else {
+            doc! { "$eq": parking_lot_id }
         };
     
         let filter = doc! {
             "user_id": user_id_query,
+            "vehicle_license_number": vehicle_license_number_query,
+            "parking_spot_id": parking_spot_id_query,
+            "issue_timestamp": issue_time_stamp_query,
             "end_timestamp": end_timestamp_query,
+            "level": level_query,
+            "parking_lot_id": parking_lot_id_query,
         };
         let mut cursor = self
             .ticket_collection
@@ -62,10 +103,10 @@ impl DB {
             _id: ticket_id,
             user_id: body.user_id.to_owned(),
             vehicle_license_number: body.vehicle_license_number.to_owned(),
+            parking_spot_id: parking_space._id.to_hex(),
             issue_timestamp: chrono::Utc::now().timestamp(),
             end_timestamp: 0,
             amount_paid: 0.0,
-            spot_name: parking_space.location.no_space.to_string(),
             level: parking_space.location.no_level,
             parking_lot_id: body.parking_lot_id.to_owned(),
             code: ticket_id.to_hex().chars().take(8).collect(),
@@ -106,7 +147,7 @@ impl DB {
             .await?;
 
         let parking_space = self
-            .get_parking_space_by_location(&ticket.parking_lot_id, &ticket.spot_name, ticket.level)
+            .get_parking_space_by_parking_spot_id(&ticket.parking_lot_id, &ticket.parking_spot_id)
             .await?;
 
         let ticket = self
@@ -185,10 +226,10 @@ impl DB {
             id: ticket._id.to_hex(),
             user_id: ticket.user_id.to_owned(),
             vehicle_license_number: ticket.vehicle_license_number.to_owned(),
+            parking_spot_id: ticket.parking_spot_id.to_owned(),
             issue_timestamp: ticket.issue_timestamp,
             end_timestamp: ticket.end_timestamp,
             amount_paid: ticket.amount_paid,
-            spot_name: ticket.spot_name.to_owned(),
             level: ticket.level,
             parking_lot_id: ticket.parking_lot_id.to_owned(),
             code: ticket.code.to_owned(),
