@@ -86,9 +86,12 @@ parking_lot_array = requests.get(url+parking_lot_endpoint).json()
 print("Parking lot array:" + str(parking_lot_array))
 parking_lot_id = parking_lot_array[0]["id"],
 
-parking_spot_endpoint = '/parking-spots'
-parking_spot_array = requests.get(url+parking_spot_endpoint).json()
-print("Parking spot array:" + str(parking_spot_array))
+parking_spot_array = [
+    "658f08eb94082310eef10604",
+    "658f08eb94082310eef10605",
+    "658f08eb94082310eef10606",
+    "658f08eb94082310eef10607",
+]
 
 user_ids = [
     ObjectId("5f9b3b9b9d9b9d9b9d9b9d9b"),
