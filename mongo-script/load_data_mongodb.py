@@ -87,7 +87,7 @@ parking_lot_id = parking_lot_array[0]["id"].replace("(", "").replace(")", "").re
 get_parking_spots_by_parking_lot_id = url+parking_lot_endpoint+"/"+str(parking_lot_id)+parking_spots_endpoint
 get_parking_spots_by_parking_lot_id = get_parking_spots_by_parking_lot_id
 print("parking spots endpoint ", get_parking_spots_by_parking_lot_id)
-parking_spot_array = requests.get(get_parking_spots_by_parking_lot_id)
+parking_spot_array = requests.get(get_parking_spots_by_parking_lot_id).json()
 print("Parking spot array:" + str(parking_spot_array))
 
 user_ids = [
@@ -112,7 +112,7 @@ for i in range(10):
         "_id": ObjectId(),
         "user_id": str(user_ids[i % len(user_ids)]),
         "vehicle_license_number": vehicle_license_number[i % len(vehicle_license_number)],
-        "parking_spot_id": parking_spot_array[int(i % len(parking_spot_array))],
+        "parking_spot_id": parking_spot_array[int(i % len(parking_spot_array))]["id"],
         "issue_timestamp": generate_timestamps()[0],
         "end_timestamp": generate_timestamps()[1],
         "amount_paid": 10.0 * (i + 1),
