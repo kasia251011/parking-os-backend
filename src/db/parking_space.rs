@@ -210,8 +210,7 @@ impl DB {
             .find(
                 doc! {
                     "parking_lot_id": parking_lot_id.to_owned(),
-                    "spot_name": parking_space.location.no_space.to_string(),
-                    "level": parking_space.location.no_level,
+                    "parking_spot_id": parking_space._id.to_hex(),
                 },
                 None,
             )
@@ -219,7 +218,7 @@ impl DB {
             .map_err(MongoQueryError)?;
 
         println!("parking_space: {:?}", parking_space);
-        println!("cursor: {:?}", cursor.next().await);
+        // println!("cursor: {:?}", cursor.next().await);
 
         let mut json_result: Vec<IncomeStats> = Vec::new();
         while let Some(doc) = cursor.next().await {
