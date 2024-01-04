@@ -150,14 +150,22 @@ impl DB {
         }
     }
 
-    pub async fn get_parking_spaces_by_parking_lot_id(&self, parking_lot_id: &str, level: u32) -> Result<Vec<ParkingSpaceResponse>> {
+    pub async fn get_parking_spaces_by_parking_lot_id(&self, parking_lot_id: &str, level: i32) -> Result<Vec<ParkingSpaceResponse>> {
+        let parking_lot_id = ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?;
+        let query = match level {
+            -1 => doc! {
+                "parking_lot_id": parking_lot_id,
+            },
+            _ => doc! {
+                "parking_lot_id": parking_lot_id,
+                "location.no_level": level,
+            },
+        };
+
         let mut cursor = self
             .parking_space_collection
             .find(
-                doc! {
-                    "parking_lot_id": ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?,
-                    "location.no_level": level,
-                },
+                query,
                 None,
             )
             .await
