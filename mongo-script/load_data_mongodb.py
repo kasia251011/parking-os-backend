@@ -13,7 +13,6 @@ MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
 
 url = 'https://parking-os-backend.onrender.com'
 parking_lot_endpoint = '/parking-lots'
-parking_spots_endpoint = '/parking-spots'
 
 class VehicleType(Enum):
     cars = 1
@@ -44,11 +43,14 @@ db["user"].insert_many([
 
 db["vehicle"].insert_many([
     {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d90"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"), "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d91"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"), "type": VehicleType.cars.value, "brand": "Mercedes", "model": "Actros", "license_plate_number": "WAW54321"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d91"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"), "type": VehicleType.trucks.value, "brand": "Mercedes", "model": "Actros", "license_plate_number": "AAW54321"},
     {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d92"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9d"), "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
     {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d93"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9e"), "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
     {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d94"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9f"), "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
 ])
+
+# Close the MongoDB connection
+client.close()
 
 headers = { 'Content-Type': 'application/json' }
 data_parking_lot = [
@@ -82,13 +84,14 @@ for parking_lot in data_parking_lot:
 
 parking_lot_array = requests.get(url+parking_lot_endpoint).json()
 print("Parking lot array:" + str(parking_lot_array))
-parking_lot_id = parking_lot_array[0]["id"].replace("(", "").replace(")", "").replace("'", "").replace(",", "")
+parking_lot_id = parking_lot_array[0]["id"],
 
-get_parking_spots_by_parking_lot_id = url+parking_lot_endpoint+"/"+str(parking_lot_id)+parking_spots_endpoint
-get_parking_spots_by_parking_lot_id = get_parking_spots_by_parking_lot_id
-print("parking spots endpoint ", get_parking_spots_by_parking_lot_id)
-parking_spot_array = requests.get(get_parking_spots_by_parking_lot_id)
-print("Parking spot array:" + str(parking_spot_array))
+parking_spot_array = [
+    "658f08eb94082310eef10604",
+    "658f08eb94082310eef10605",
+    "658f08eb94082310eef10606",
+    "658f08eb94082310eef10607",
+]
 
 user_ids = [
     ObjectId("5f9b3b9b9d9b9d9b9d9b9d9b"),
@@ -100,7 +103,7 @@ user_ids = [
 
 vehicle_license_number = [
     "WAW12345",
-    "WAW54321",
+    "AAW54321",
     "WAW67890",
     "WAW12345",
     "WAW67890",
@@ -110,20 +113,17 @@ tickets = []
 for i in range(10):
     tickets.append({
         "_id": ObjectId(),
-        "user_id": str(user_ids[i % len(user_ids)]),
-        "vehicle_license_number": vehicle_license_number[i % len(vehicle_license_number)],
-        "parking_spot_id": parking_spot_array[int(i % len(parking_spot_array))],
+        "user_id": str(user_ids[i % len(user_ids)]),  # Cycle through the user_ids list
+        "vehicle_license_number": vehicle_license_number[i % len(vehicle_license_number)],  # Cycle through the vehicle_license_number list
+        "parking_spot_id": str(parking_spot_array[i % len(parking_spot_array)]["_id"]),  # Cycle through the parking_spot_array list
         "issue_timestamp": generate_timestamps()[0],
         "end_timestamp": generate_timestamps()[1],
-        "amount_paid": 10.0 * (i + 1),
-        "level": 1,
-        "parking_lot_id": str(parking_lot_id),
-        "code": f"CODE{i}",
+        "amount_paid": 10.0 * (i + 1),  # Replace with the actual amount paid
+        "level": 1,  # Replace with the actual level
+        "parking_lot_id": str(parking_lot_id),  # Replace with the actual parking_lot_id
+        "code": f"CODE{i}",  # Replace with the actual code logic
     })
-    print("Tickets: " + str(tickets[i]))
+    print("Tickets: " + tickets[i])
 
 # Add the generated tickets to the "ticket" collection
 db["ticket"].insert_many(tickets)
-
-# Close the MongoDB connection
-client.close()
