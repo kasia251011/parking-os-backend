@@ -209,6 +209,7 @@ impl DB {
             .await
             .map_err(MongoQueryError)?;
 
+        println!("cursor: {:?}", cursor.next().await);
         let mut json_result: Vec<IncomeStats> = Vec::new();
         while let Some(doc) = cursor.next().await {
             let ticket: Ticket = doc.unwrap();

@@ -32,5 +32,10 @@ pub struct QueryTicket {
 
 #[derive(Deserialize)]
 pub struct QueryParkingSpaceCode {
-    pub level: u32,
+    #[serde(default = "default_level")]
+    pub level: i32,
+}
+
+fn default_level() -> i32 {
+    -1
 }
