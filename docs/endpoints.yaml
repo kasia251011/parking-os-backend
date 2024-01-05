@@ -532,9 +532,9 @@ paths:
     get:
       tags:
         - tickets
-      summary: User gets their active tickets
-      description: Returns all of the users active tickets <br> Allowed roles<span>&#58;</span>  ```USER```
-      operationId: getMyTickets
+      summary: User gets their active ticket
+      description: Returns all of the users active ticket <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: getMyTicket
       parameters:
         - name: Authorization
           in: header
@@ -550,9 +550,9 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UsersTicket'
+                $ref: '#/components/schemas/UsersTicket'
+        "401":
+          description: No active ticket for user
     post:
       tags:
         - tickets
