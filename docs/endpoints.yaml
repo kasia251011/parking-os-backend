@@ -10,7 +10,7 @@ paths:
   /user:
     post:
       tags:
-        - users
+        - auth
       summary: User adds a new user
       description: Add a new user <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: addAUser
@@ -24,6 +24,14 @@ paths:
       responses:
         "201":
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
         "400":
           description: Invalid input
   /users:
@@ -499,51 +507,42 @@ paths:
   /login:
     post:
       tags:
-        - login
+        - auth
       summary: Log in
       description: Allows the user to log in <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: userLogIn
-      parameters:
-        - name: email
-          in: cookie
-          description: Users email address
-          required: true
-          explode: false
-          schema:
-            type: string
-            format: email
-        - name: password
-          in: cookie
-          description: Users password
-          required: true
-          explode: false
-          schema:
-            type: string
-            format: password
+      requestBody:
+        description: Login
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogIn"
+        required: true
+      
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                name: token
-                type: string
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
+        "411":
+          description: Incorrect password
+        "412":
+          description: Incorrect login
   /me/ticket:
     get:
+      security:
+        - bearerAuth: []
       tags:
         - tickets
       summary: User gets their active ticket
       description: Returns all of the users active ticket <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: getMyTicket
-      parameters:
-        - name: Authorization
-          in: header
-          description: JWS token authorizing user
-          required: true
-          explode: false
-          schema:
-            type: object
-            $ref: '#/components/schemas/JWStoken'
       responses:
         "200":
           description: successful operation
@@ -554,26 +553,20 @@ paths:
         "401":
           description: No active ticket for user
     post:
+      security:
+        - bearerAuth: []
       tags:
         - tickets
       summary: User creates ticket
       description: Allows the user to create a ticket and then park <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: userCreateTicket
-      parameters:
-        - name: vehicleLicenseNumber
-          in: query
-          description: Licence plate number of the parking vehicle
-          required: true
-          explode: false
-          schema:
-            type: string
-        - name: parkingLotId
-          in: query
-          description: Id of parking lot
-          required: true
-          explode: false
-          schema:
-            type: string
+      requestBody:
+        description: Create a new ticket
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketCreateSchemaUser'
+        required: true
       responses:
         "200":
           description: successful operation
@@ -584,45 +577,34 @@ paths:
 
   /me/balance:
     get:
+      security:
+        - bearerAuth: []
       tags:
         - balance
       summary: User gets their balance
       description: Returns current users balance <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: getMyBalance
-      parameters:
-        - name: Authorization
-          in: header
-          description: JWS token authorizing user
-          required: true
-          explode: false
-          schema:
-            type: object
-            $ref: '#/components/schemas/JWStoken'
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                name: balance
-                type: number
-                format: float
-                description: Amount of money in PLN
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: float
+                    description: Amount of money in PLN
     put:
+      security:
+        - bearerAuth: []
       tags:
         - balance
       summary: Increase users balance
       description: Add money to users balance <br> Allowed roles<span>&#58;</span>   ```USER```
       operationId: addMoney
       parameters:
-        - name: Authorization
-          in: header
-          description: JWS token authorizing user
-          required: true
-          explode: false
-          schema:
-            type: object
-            $ref: '#/components/schemas/JWStoken'
         - name: value
           in: query
           description: Amount of money to add in PLN
@@ -638,20 +620,13 @@ paths:
           description: Invalid data
   /me/vehicles:
     get:
+      security:
+        - bearerAuth: []
       tags:
         - vehicles
       summary: Get users vehicles
       description: Allows the user to see their vehicles <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: userGetVehicles
-      parameters:
-        - name: Authorization
-          in: header
-          description: JWS token authorizing user
-          required: true
-          explode: false
-          schema:
-            type: object
-            $ref: '#/components/schemas/JWStoken'
       responses:
         "200":
           description: successful operation
@@ -662,55 +637,20 @@ paths:
                 items:
                   $ref: "#/components/schemas/Vehicle"
     post:
+      security:
+        - bearerAuth: []
       tags:
         - vehicles
       summary: User adds a vehicle
       description: Allows the user to add a vehicle <br> Allowed roles<span>&#58;</span>  ```USER```
       operationId: userCreateVehicle
-      parameters:
-        - name: Authorization
-          in: header
-          description: JWS token authorizing user
-          required: true
-          explode: false
-          schema:
-            type: object
-            $ref: '#/components/schemas/JWStoken'
-        - name: type
-          in: query
-          description: Vwhicle type
-          required: true
-          explode: false
-          schema:
-            type: string
-            description: Type of vehicle
-            enum:
-              - CAR
-              - TRUCK
-        - name: brand
-          in: query
-          description: Vehicle brand
-          required: true
-          explode: false
-          schema:
-            type: string
-            description: Brand of vehicle
-        - name: model
-          in: query
-          description: Vehicle model
-          required: true
-          explode: false
-          schema:
-            type: string
-            description: Model of vehicle
-        - name: licensePlateNumber
-          in: query
-          description: Vehicle licence plate number
-          required: true
-          explode: false
-          schema:
-            type: string
-            description: Primary key
+      requestBody:
+        description: Create a new user
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVehicleSchemaUser"
+        required: true
       responses:
         "200":
           description: successful operation
@@ -721,6 +661,11 @@ paths:
                 type: string
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     JWStoken:
       type: object
@@ -907,7 +852,17 @@ components:
               pricePerHour:
                 type: number
                 description: Price per hour
-                
+    UserLogIn:
+      type: object
+      properties:
+        email:
+          description: Users email address
+          type: string
+          format: email
+        password:
+          description: Users password
+          type: string
+          format: password
     ParkingLot:
       type: object
       properties:
@@ -1043,3 +998,31 @@ components:
         pricePerHour:
           type: number
           description: Price per hour
+    TicketCreateSchemaUser:
+      type: object
+      properties:
+          vehicleLicenseNumber:
+            type: string
+            description: Licence plate number of the parking vehicle            
+          parkingLotId:
+            type: string
+            description: Id of parking lot
+    CreateVehicleSchemaUser:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of vehicle
+          enum:
+            - CAR
+            - TRUCK
+        brand:
+          type: string
+          description: Brand of vehicle
+        model:
+          type: string
+          description: Model of vehicle
+        licensePlateNumber:
+          description: Vehicle licence plate number
+          type: string
+
