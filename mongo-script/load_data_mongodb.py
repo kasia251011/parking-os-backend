@@ -43,11 +43,11 @@ db["user"].insert_many([
 ])
 
 db["vehicle"].insert_many([
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d90"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"), "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d91"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"), "type": VehicleType.cars.value, "brand": "Mercedes", "model": "Actros", "license_plate_number": "WAW54321"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d92"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9d"), "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d93"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9e"), "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d94"), "user_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9f"), "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d90"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9c", "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d91"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9c", "type": VehicleType.cars.value, "brand": "Mercedes", "model": "Actros", "license_plate_number": "WAW54321"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d92"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9d", "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d93"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9e", "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d94"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9f", "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
 ])
 
 headers = { 'Content-Type': 'application/json' }
