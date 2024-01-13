@@ -7,6 +7,33 @@ info:
 servers:
   - url: https://parking-os-backend.onrender.com/
 paths:
+  /user:
+    post:
+      tags:
+        - auth
+      summary: User adds a new user
+      description: Add a new user <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: addAUser
+      requestBody:
+        description: Create a new user
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateSchema"
+        required: true
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
+        "400":
+          description: Invalid input
   /users:
     get:
       tags:
@@ -41,6 +68,27 @@ paths:
           description: Successful operation
         "400":
           description: Invalid input
+  /users/{id}/block:
+    put:
+      tags:
+        - users
+      summary: Block an user
+      description: Block a certain user <br> Allowed roles<span>&#58;</span>  ```ADMIN```
+      operationId: blockUser
+      parameters:
+        - name: id
+          in: path
+          description: Primary key for users table
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Incorrect data
+
   /vehicles:
     get:
       tags:
@@ -456,8 +504,187 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tariff'
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Log in
+      description: Allows the user to log in <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: userLogIn
+      requestBody:
+        description: Login
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogIn"
+        required: true
+      
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
+        "411":
+          description: Incorrect password
+        "412":
+          description: Incorrect login
+  /me/ticket:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - tickets
+      summary: User gets their active ticket
+      description: Returns all of the users active ticket <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: getMyTicket
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersTicket'
+        "401":
+          description: No active ticket for user
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - tickets
+      summary: User creates ticket
+      description: Allows the user to create a ticket and then park <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: userCreateTicket
+      requestBody:
+        description: Create a new ticket
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketCreateSchemaUser'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Invalid input
+        "410":
+          description: No parking space avilable
+
+  /me/balance:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - balance
+      summary: User gets their balance
+      description: Returns current users balance <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: getMyBalance
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: float
+                    description: Amount of money in PLN
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - balance
+      summary: Increase users balance
+      description: Add money to users balance <br> Allowed roles<span>&#58;</span>   ```USER```
+      operationId: addMoney
+      parameters:
+        - name: value
+          in: query
+          description: Amount of money to add in PLN
+          required: true
+          explode: false
+          schema:
+            type: number
+            format: float
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Invalid data
+  /me/vehicles:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - vehicles
+      summary: Get users vehicles
+      description: Allows the user to see their vehicles <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: userGetVehicles
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vehicle"
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - vehicles
+      summary: User adds a vehicle
+      description: Allows the user to add a vehicle <br> Allowed roles<span>&#58;</span>  ```USER```
+      operationId: userCreateVehicle
+      requestBody:
+        description: Create a new user
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVehicleSchemaUser"
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                name: token
+                type: string
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
+    JWStoken:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Users name
+        surname:
+          type: string
+          description: Users surname
+        email:
+          type: string
+          format: email
+          description: Users e-mail address
+        role:
+          type: string
+          enum:
+            - USER
+            - ADMIN
     User:
       type: object
       properties:
@@ -477,6 +704,23 @@ components:
         blocked:
           type: boolean
           description: Status of user
+    UserCreateSchema:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Users name
+        surname:
+          type: string
+          description: Users surname
+        email:
+          type: string
+          format: email
+          description: Users e-mail address
+        password:
+          type: string
+          format: password
+          description: Users password
     Ticket:
       type: object
       properties:
@@ -513,6 +757,28 @@ components:
         code:
           type: string
           description: Access code (this field will be here until GET me/ticket doesn't exist)
+    UsersTicket:
+      type: object
+      properties:
+        vehicleLicenseNumber:
+          type: string
+          description: Vehicle id
+        issueTimestamp:
+          type: integer
+          format: timestamp
+          description: Start time of parking
+        spotOrdinalNumber:
+          type: integer
+          description: Number painted on the parking space which allows the user to find it
+        level:
+          type: integer
+          description: Parking lot level of the parking spot
+        parkingLotId:
+          type: string
+          description: Parking lot id
+        code:
+          type: string
+          description: Access code        
     TicketCreateSchema:
       type: object
       properties:
@@ -586,7 +852,17 @@ components:
               pricePerHour:
                 type: number
                 description: Price per hour
-                
+    UserLogIn:
+      type: object
+      properties:
+        email:
+          description: Users email address
+          type: string
+          format: email
+        password:
+          description: Users password
+          type: string
+          format: password
     ParkingLot:
       type: object
       properties:
@@ -722,3 +998,31 @@ components:
         pricePerHour:
           type: number
           description: Price per hour
+    TicketCreateSchemaUser:
+      type: object
+      properties:
+          vehicleLicenseNumber:
+            type: string
+            description: Licence plate number of the parking vehicle            
+          parkingLotId:
+            type: string
+            description: Id of parking lot
+    CreateVehicleSchemaUser:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of vehicle
+          enum:
+            - CAR
+            - TRUCK
+        brand:
+          type: string
+          description: Brand of vehicle
+        model:
+          type: string
+          description: Model of vehicle
+        licensePlateNumber:
+          description: Vehicle licence plate number
+          type: string
+
