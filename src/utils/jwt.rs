@@ -7,7 +7,6 @@ use crate::structs::model::Role;
 pub struct Claims {
     pub sub: String,
     pub user: User,
-    pub exp: usize,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -19,15 +18,9 @@ pub struct User {
 }
 
 pub fn create_token(user_id: &str, user: User) -> String {
-    let expiration = chrono::Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(10000000000000000000000000000000))
-        .expect("valid timestamp")
-        .timestamp();
-
     let claims = Claims {
         sub: user_id.to_owned(),
         user: user,
-        exp: expiration as usize,
     };
 
     let token = encode(
