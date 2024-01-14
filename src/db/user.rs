@@ -8,7 +8,7 @@ use crate::{structs::{
     error::MyError::{*, self}, 
     model::{User, Role},
     response::UserResponse, 
-    schema::{CreateUserSchema, RegisterUserSchema}
+    schema::{CreateUserSchema, RegisterUserSchema, LoginUserSchema}
 }, utils::jwt};
 
 use super::common::DB;
@@ -142,6 +142,31 @@ impl DB {
             role: Role::User,
         };
         let token = jwt::create_token(&new_user_id.to_hex(), jwt_user);
+
+        Ok(token)
+    }
+
+    pub async fn login_user(&self, body: &LoginUserSchema) -> Result<String> {
+        let filter = doc! { "email": body.email.to_owned() };
+        let user = self
+            .user_collection
+            .find_one(filter, None)
+            .await
+            .map_err(MongoQueryError)?
+            .ok_or(MongoNotFound("User not found".to_string()))?;
+
+        if !bcrypt::verify(&body.password, &user.password).unwrap() {
+            return Err(InvalidCredentialsError("Invalid credentials".to_string()));
+        }
+
+        // create jwt token
+        let jwt_user = jwt::User {
+            name: user.name.to_owned(),
+            surname: user.surname.to_owned(),
+            email: user.email.to_owned(),
+            role: user.role.to_owned(),
+        };
+        let token = jwt::create_token(&user._id.to_hex(), jwt_user);
 
         Ok(token)
     }

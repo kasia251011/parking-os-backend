@@ -35,6 +35,8 @@ pub enum MyError {
     NotEnoughBalanceError(String),
     #[error("Vehicle not found: {0}")]
     VehicleNotFoundError(String),
+    #[error("Invalid credentials: {0}")]
+    InvalidCredentialsError(String),
 }
 
 #[derive(Serialize)]
@@ -156,6 +158,13 @@ impl Into<(axum::http::StatusCode, Json<serde_json::Value>)> for MyError {
                 ErrorResponse {
                     status: "400",
                     message: format!("Vehicle not found: {}", message),
+                },
+            ),
+            MyError::InvalidCredentialsError(message) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorResponse {
+                    status: "400",
+                    message: format!("Invalid credentials: {}", message),
                 },
             ),
         };
