@@ -74,3 +74,25 @@ pub async fn get_user_active_tickets(
         Err(_) => Err((StatusCode::NOT_FOUND, "Ticket not found".to_string())),
     }
 }
+
+pub async fn create_user_ticket(
+    headers: HeaderMap,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<CreateTicketUserSchema>,
+) -> Result<impl IntoResponse, (StatusCode, String)> 
+{
+    let authorization_header = match headers.get("Authorization") {
+        Some(header) => header.to_str().unwrap(),
+        None => return Err((StatusCode::BAD_REQUEST, "Invalid header".to_string())),
+    };
+
+    let user_id = match crate::utils::jwt::decode_token(authorization_header) {
+        Ok(claims) => claims.sub,
+        Err(_) => return Err((StatusCode::BAD_REQUEST, "Invalid token".to_string())),
+    };
+
+    match app_state.db.create_user_ticket(&user_id, &body).await.map_err(MyError::from) {
+        Ok(res) => Ok((StatusCode::CREATED, Json(res))),
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
+    }
+}

@@ -26,7 +26,7 @@ use handlers::{
     users::{create_user, get_users, register_user, login_user}, 
     parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code, get_parking, get_parking_lot_levels, get_parking_lot_income},
     vehicle::{create_vehicle, get_vehicles, get_vehicle_by_license_plate_number, get_user_vehicles, create_user_vehicle}, 
-    ticket::{get_tickets, create_ticket, put_ticket, get_user_active_tickets},
+    ticket::{get_tickets, create_ticket, put_ticket, get_user_active_tickets, create_user_ticket},
     tariff::get_tariffs_by_parking_lot_id,
     parking_space::{get_parking_spaces_by_parking_lot_id, get_parking_space_income},
 };
@@ -83,7 +83,7 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/me/vehicles", get(get_user_vehicles).post(create_user_vehicle))
         .route("/tickets", get(get_tickets).post(create_ticket))
         .route("/tickets/:code", put(put_ticket))
-        .route("/me/ticet", get(get_user_active_tickets))
+        .route("/me/ticket", get(get_user_active_tickets).post(create_user_ticket))
         .route("/parking-lots/:id/parking-spots", get(get_parking_spaces_by_parking_lot_id))
         .route("/parking-lots/:id/parking-spots/:id/income", get(get_parking_space_income))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))

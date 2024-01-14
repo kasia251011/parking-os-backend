@@ -61,6 +61,14 @@ pub struct CreateTicketSchema {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct CreateTicketUserSchema {
+    #[serde(rename = "vehicleLicenseNumber")]
+    pub vehicle_license_number: String,
+    #[serde(rename = "parkingLotId")]
+    pub parking_lot_id: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CreateTariffSchema {
     #[serde(rename = "minTime")]
     pub min_time: i64,
