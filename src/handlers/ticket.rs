@@ -61,7 +61,10 @@ pub async fn get_user_active_tickets(
 
     let user_id = match crate::utils::jwt::decode_token(authorization_header) {
         Ok(claims) => claims.sub,
-        Err(_) => return Err((StatusCode::BAD_REQUEST, "Invalid token".to_string())),
+        Err(e) => {
+            println!("{}", e);
+            return Err((StatusCode::BAD_REQUEST, "Invalid token".to_string()))
+        },
     };
 
     match app_state

@@ -251,19 +251,22 @@ impl DB {
     
         let mut json_result: Vec<TicketUserResponse> = Vec::new();
         while let Some(doc) = cursor.next().await {
-            json_result.push(self.doc_to_ticket_user(&doc.unwrap())?);
+            json_result.push(self.doc_to_ticket_user(&doc.unwrap()).await.unwrap());
         }
     
         Ok(json_result)
     }
 
-    fn doc_to_ticket_user(&self, ticket: &Ticket) -> Result<TicketUserResponse> {
+    async fn doc_to_ticket_user(&self, ticket: &Ticket) -> Result<TicketUserResponse> {
+        let spot_oridinal_number = self.get_parking_space_by_parking_spot_id(&ticket.parking_lot_id, &ticket.parking_spot_id)
+            .await?
+            .location
+            .no_space;
+
         let ticket_response = TicketUserResponse {
             vehicle_license_number: ticket.vehicle_license_number.to_owned(),
-            parking_spot_id: ticket.parking_spot_id.to_owned(),
+            spot_ordinal_number: spot_oridinal_number as i64,
             issue_timestamp: ticket.issue_timestamp,
-            end_timestamp: ticket.end_timestamp,
-            amount_paid: ticket.amount_paid,
             level: ticket.level,
             parking_lot_id: ticket.parking_lot_id.to_owned(),
             code: ticket.code.to_owned(),
