@@ -38,7 +38,7 @@ for collection_name in db.list_collection_names():
 # Fill collections with new data
 db["user"].insert_many([
     {
-        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9b"},
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9b"),
         "name": "Krzysztof",
         "surname": "Admin",
         "account_balance": 0,
@@ -48,7 +48,7 @@ db["user"].insert_many([
         "role": "Admin"
     },
     {
-        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9c"},
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"),
         "name": "Jan",
         "surname": "Kowalski",
         "account_balance": 1000,
@@ -58,7 +58,7 @@ db["user"].insert_many([
         "role": "User"
     },
     {
-        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9d"},
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9d"),
         "name": "Adam",
         "surname": "Nowak",
         "account_balance": 2000,
@@ -68,7 +68,7 @@ db["user"].insert_many([
         "role": "User"
     },
     {
-        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9e"},
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9e"),
         "name": "Anna",
         "surname": "Kowalska",
         "account_balance": 3000,
@@ -78,7 +78,7 @@ db["user"].insert_many([
         "role": "User"
     },
     {
-        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9f"},
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9f"),
         "name": "Jan",
         "surname": "Nowak",
         "account_balance": 4000,
