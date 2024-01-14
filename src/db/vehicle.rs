@@ -4,7 +4,7 @@ use futures::StreamExt;
 use crate::structs::{
     error::MyError::{*, self}, 
     model::{VehicleType, Vehicle},
-    response::VehicleResponse, schema::CreateVehicleSchema,  
+    response::VehicleResponse, schema::{CreateVehicleSchema, CreateVehicleUserSchema},  
 };
 
 use super::common::DB;
@@ -53,6 +53,36 @@ impl DB {
                 _ => return Err(InvalidVehicleTypeError(body.vehicle_type.to_owned())),
             },
             user_id: body.user_id.to_owned(),
+            brand: body.brand.to_owned(),
+            model: body.model.to_owned(),
+            license_plate_number: body.license_plate_number.to_owned(),
+        };
+
+        match self.vehicle_collection.insert_one(vehicle, None).await {
+            Ok(result) => result,
+            Err(e) => {
+                if e.to_string()
+                    .contains("E110000 duplicate key error collection")
+                {
+                    return Err(MongoDuplicateError(e));
+                }
+                return Err(MongoQueryError(e));
+            }
+        };
+
+        Ok(new_vehicle_id.to_hex())
+    }
+
+    pub async fn create_user_vehicle(&self, user_id: &str, body: &CreateVehicleUserSchema) -> Result<String> {
+        let new_vehicle_id = ObjectId::new();
+        let vehicle = Vehicle {
+            _id: new_vehicle_id,
+            vehicle_type: match body.vehicle_type.as_str() {
+                "Car" => VehicleType::Car,
+                "Truck" => VehicleType::Truck,
+                _ => return Err(InvalidVehicleTypeError(body.vehicle_type.to_owned())),
+            },
+            user_id: user_id.to_owned(),
             brand: body.brand.to_owned(),
             model: body.model.to_owned(),
             license_plate_number: body.license_plate_number.to_owned(),

@@ -41,6 +41,16 @@ pub struct CreateVehicleSchema {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct CreateVehicleUserSchema {
+    #[serde(rename = "type")]
+    pub vehicle_type: String,
+    pub brand: String,
+    pub model: String,
+    #[serde(rename = "licensePlateNumber")]
+    pub license_plate_number: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CreateTicketSchema {
     #[serde(rename = "userId")]
     pub user_id: String,
