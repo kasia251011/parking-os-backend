@@ -6,7 +6,7 @@ use futures::StreamExt;
 use crate::structs::{
     error::MyError::{*, self}, 
     model::{Ticket, ParkingSpace},
-    response::TicketResponse, 
+    response::{TicketResponse, TicketUserResponse}, 
     schema::CreateTicketSchema
 };
 
@@ -225,6 +225,40 @@ impl DB {
         let ticket_response = TicketResponse {
             id: ticket._id.to_hex(),
             user_id: ticket.user_id.to_owned(),
+            vehicle_license_number: ticket.vehicle_license_number.to_owned(),
+            parking_spot_id: ticket.parking_spot_id.to_owned(),
+            issue_timestamp: ticket.issue_timestamp,
+            end_timestamp: ticket.end_timestamp,
+            amount_paid: ticket.amount_paid,
+            level: ticket.level,
+            parking_lot_id: ticket.parking_lot_id.to_owned(),
+            code: ticket.code.to_owned(),
+        };
+
+        Ok(ticket_response)
+    }
+
+    pub async fn get_user_active_tickets(&self, user_id: &str) -> Result<Vec<TicketUserResponse>> {
+        let filter = doc! { 
+            "user_id": user_id,
+            "end_timestamp": 0,
+        };
+        let mut cursor = self
+            .ticket_collection
+            .find(filter, None)
+            .await
+            .map_err(MongoQueryError)?;
+    
+        let mut json_result: Vec<TicketUserResponse> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            json_result.push(self.doc_to_ticket_user(&doc.unwrap())?);
+        }
+    
+        Ok(json_result)
+    }
+
+    fn doc_to_ticket_user(&self, ticket: &Ticket) -> Result<TicketUserResponse> {
+        let ticket_response = TicketUserResponse {
             vehicle_license_number: ticket.vehicle_license_number.to_owned(),
             parking_spot_id: ticket.parking_spot_id.to_owned(),
             issue_timestamp: ticket.issue_timestamp,
