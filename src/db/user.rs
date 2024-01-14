@@ -7,7 +7,7 @@ use futures::StreamExt;
 use crate::{structs::{
     error::MyError::{*, self}, 
     model::{User, Role},
-    response::UserResponse, 
+    response::{UserResponse, UserBalance}, 
     schema::{CreateUserSchema, RegisterUserSchema, LoginUserSchema}
 }, utils::jwt};
 
@@ -169,5 +169,15 @@ impl DB {
         let token = jwt::create_token(&user._id.to_hex(), jwt_user);
 
         Ok(token)
+    }
+
+    pub async fn get_user_balance(&self, user_id: &str) -> Result<UserBalance> {
+        let user = self.get_user_by_id(user_id).await?;
+
+        let user_balance = UserBalance {
+            balance: user.account_balance,
+        };
+
+        Ok(user_balance)
     }
 }
