@@ -36,6 +36,8 @@ impl DB {
             name: body.name.to_owned(),
             surname: body.surname.to_owned(),
             account_balance: body.account_balance,
+            email: body.name.to_owned() + "." + &body.surname.to_owned() + "@gmail.com",
+            password: "123".to_string(),
             blocked: body.blocked,
         };
 

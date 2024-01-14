@@ -6,6 +6,8 @@ pub struct User {
     pub _id: ObjectId,
     pub name: String,
     pub surname: String,
+    pub email: String,
+    pub password: String,
     pub account_balance: f64,
     pub blocked: bool,
 }
