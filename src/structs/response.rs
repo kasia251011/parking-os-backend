@@ -13,6 +13,11 @@ pub struct UserResponse {
 }
 
 #[derive(Serialize, Debug)]
+pub struct UserBalance {
+    pub balance: f64,
+}
+
+#[derive(Serialize, Debug)]
 pub struct ParkingLotResponse {
     pub id: String,
     #[serde(rename = "costOfMaintenance")]

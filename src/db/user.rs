@@ -7,7 +7,7 @@ use futures::StreamExt;
 use crate::{structs::{
     error::MyError::{*, self}, 
     model::{User, Role},
-    response::UserResponse, 
+    response::{UserResponse, UserBalance}, 
     schema::{CreateUserSchema, RegisterUserSchema, LoginUserSchema}
 }, utils::jwt};
 
@@ -169,5 +169,29 @@ impl DB {
         let token = jwt::create_token(&user._id.to_hex(), jwt_user);
 
         Ok(token)
+    }
+
+    pub async fn get_user_balance(&self, user_id: &str) -> Result<UserBalance> {
+        let user = self.get_user_by_id(user_id).await?;
+
+        let user_balance = UserBalance {
+            balance: user.account_balance,
+        };
+
+        Ok(user_balance)
+    }
+
+    pub async fn deposit_balance(&self, user_id: &str, amount: f64) -> Result<String> {
+        let user = self.get_user_by_id(user_id).await?;
+        let new_balance = user.account_balance + amount;
+
+        let filter = doc! { "_id": ObjectId::from_str(user_id).unwrap() };
+        let update = doc! { "$set": { "account_balance": new_balance } };
+        self.user_collection
+            .update_one(filter, update, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        Ok("Successful operation".to_string())
     }
 }
