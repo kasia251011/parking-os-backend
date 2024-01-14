@@ -44,7 +44,8 @@ db["user"].insert_many([
         "account_balance": 0,
         "blocked": False,
         "email": "krzysztof@admin.com",
-        "password": "$2a$10$p0MGb/vlu.sjfHiCV.k02.Bq14NAigmWbNqDJ19R8h0UBGf.UwcZy" # admin123
+        "password": "$2a$10$p0MGb/vlu.sjfHiCV.k02.Bq14NAigmWbNqDJ19R8h0UBGf.UwcZy", # admin123
+        "role": "Admin"
     },
     {
         "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9c"},
@@ -53,7 +54,8 @@ db["user"].insert_many([
         "account_balance": 1000,
         "blocked": False,
         "email": "jan.kowalski@example.com",
-        "password": "$2a$10$v/cJp3VcYXwG.3xfUerXFOYoqBxn1Fc04wQuKug2Nm/ev46u.u8SS" # password123
+        "password": "$2a$10$v/cJp3VcYXwG.3xfUerXFOYoqBxn1Fc04wQuKug2Nm/ev46u.u8SS", # password123
+        "role": "User"
     },
     {
         "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9d"},
@@ -62,7 +64,8 @@ db["user"].insert_many([
         "account_balance": 2000,
         "blocked": False,
         "email": "adam.nowak@example.com",
-        "password": "$2a$10$YKYPj5.wk6lpG9b7PazFtO0WMB.D.QQZDnVj9r40Z1Ume5hRbpIQK" # secure123
+        "password": "$2a$10$YKYPj5.wk6lpG9b7PazFtO0WMB.D.QQZDnVj9r40Z1Ume5hRbpIQK", # secure123
+        "role": "User"
     },
     {
         "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9e"},
@@ -71,7 +74,8 @@ db["user"].insert_many([
         "account_balance": 3000,
         "blocked": False,
         "email": "anna.kowalska@example.com",
-        "password": "$2a$10$YQRpqbv2gZjchpc4gymo3Ok92PpkEsPXgpco7cSoi/wrIgGBWSifu" # pass123
+        "password": "$2a$10$YQRpqbv2gZjchpc4gymo3Ok92PpkEsPXgpco7cSoi/wrIgGBWSifu", # pass123
+        "role": "User"
     },
     {
         "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9f"},
@@ -80,7 +84,8 @@ db["user"].insert_many([
         "account_balance": 4000,
         "blocked": False,
         "email": "jan.nowak@example.com",
-        "password": "$2a$10$VfvVXxOo39T5zsJCfCXQ4uktwn9KF5OVvgZBSg/6458MuHRHqzZ9C" # test123
+        "password": "$2a$10$VfvVXxOo39T5zsJCfCXQ4uktwn9KF5OVvgZBSg/6458MuHRHqzZ9C", # test123
+        "role": "User"
     }
 ])
 
