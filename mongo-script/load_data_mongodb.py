@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
 load_dotenv()
 
@@ -37,11 +37,51 @@ for collection_name in db.list_collection_names():
 
 # Fill collections with new data
 db["user"].insert_many([
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9b"), "name": "Krzysztof", "surname": "Admin", "account_balance": 0, "blocked": False},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9c"), "name": "Jan", "surname": "Kowalski", "account_balance": 1000, "blocked": False},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9d"), "name": "Adam", "surname": "Nowak", "account_balance": 2000, "blocked": False},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9e"), "name": "Anna", "surname": "Kowalska", "account_balance": 3000, "blocked": False},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d9f"), "name": "Jan", "surname": "Nowak", "account_balance": 4000, "blocked": False},
+    {
+        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9b"},
+        "name": "Krzysztof",
+        "surname": "Admin",
+        "account_balance": 0,
+        "blocked": False,
+        "email": "krzysztof@admin.com",
+        "password": "$2a$10$p0MGb/vlu.sjfHiCV.k02.Bq14NAigmWbNqDJ19R8h0UBGf.UwcZy" # admin123
+    },
+    {
+        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9c"},
+        "name": "Jan",
+        "surname": "Kowalski",
+        "account_balance": 1000,
+        "blocked": False,
+        "email": "jan.kowalski@example.com",
+        "password": "$2a$10$v/cJp3VcYXwG.3xfUerXFOYoqBxn1Fc04wQuKug2Nm/ev46u.u8SS" # password123
+    },
+    {
+        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9d"},
+        "name": "Adam",
+        "surname": "Nowak",
+        "account_balance": 2000,
+        "blocked": False,
+        "email": "adam.nowak@example.com",
+        "password": "$2a$10$YKYPj5.wk6lpG9b7PazFtO0WMB.D.QQZDnVj9r40Z1Ume5hRbpIQK" # secure123
+    },
+    {
+        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9e"},
+        "name": "Anna",
+        "surname": "Kowalska",
+        "account_balance": 3000,
+        "blocked": False,
+        "email": "anna.kowalska@example.com",
+        "password": "$2a$10$YQRpqbv2gZjchpc4gymo3Ok92PpkEsPXgpco7cSoi/wrIgGBWSifu" # pass123
+    },
+    {
+        "_id": {"$oid": "5f9b3b9b9d9b9d9b9d9b9d9f"},
+        "name": "Jan",
+        "surname": "Nowak",
+        "account_balance": 4000,
+        "blocked": False,
+        "email": "jan.nowak@example.com",
+        "password": "$2a$10$VfvVXxOo39T5zsJCfCXQ4uktwn9KF5OVvgZBSg/6458MuHRHqzZ9C" # test123
+    }
 ])
 
 db["vehicle"].insert_many([
