@@ -20,7 +20,7 @@ pub struct User {
 
 pub fn create_token(user_id: &str, user: User) -> String {
     let expiration = chrono::Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(300))
+        .checked_add_signed(chrono::Duration::seconds(10000000000000000000000000000000))
         .expect("valid timestamp")
         .timestamp();
 
