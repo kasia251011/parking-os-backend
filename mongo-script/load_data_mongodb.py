@@ -1,4 +1,5 @@
 from enum import Enum
+import random
 import pymongo
 import os
 from dotenv import load_dotenv
@@ -15,15 +16,16 @@ url = 'https://parking-os-backend.onrender.com'
 parking_lot_endpoint = '/parking-lots'
 parking_spots_endpoint = '/parking-spots'
 
-class VehicleType(Enum):
-    cars = 1
-    trucks = 2
-
-def generate_timestamps():
-    now = datetime.now()
-    issue_timestamp = int(now.timestamp())
-    end_timestamp = int((now + timedelta(hours=2)).timestamp())
-    return issue_timestamp, end_timestamp
+def generate_random_timestamp_2023():
+    year = 2023
+    month = random.randint(1, 12)
+    day = random.randint(1, 28)  # Assuming all months have at most 28 days for simplicity
+    hour = random.randint(0, 23)
+    minute = random.randint(0, 59)
+    second = random.randint(0, 59)
+    
+    timestamp = int(datetime(year, month, day, hour, minute, second).timestamp())
+    return timestamp
 
 # Connect to MongoDB
 client = pymongo.MongoClient(MONGO_URI)
@@ -43,11 +45,11 @@ db["user"].insert_many([
 ])
 
 db["vehicle"].insert_many([
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d90"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9c", "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d91"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9c", "type": VehicleType.cars.value, "brand": "Mercedes", "model": "Actros", "license_plate_number": "WAW54321"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d92"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9d", "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d93"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9e", "type": VehicleType.cars.value, "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
-    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d94"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9f", "type": VehicleType.cars.value, "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d90"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9c", "type": "Car", "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d91"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9c", "type": "Car", "brand": "Mercedes", "model": "Actros", "license_plate_number": "WAW54321"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d92"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9d", "type": "Car", "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d93"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9e", "type": "Car", "brand": "BMW", "model": "X5", "license_plate_number": "WAW12345"},
+    {"_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9d94"), "user_id": "5f9b3b9b9d9b9d9b9d9b9d9f", "type": "Car", "brand": "Audi", "model": "A6", "license_plate_number": "WAW67890"},
 ])
 
 headers = { 'Content-Type': 'application/json' }
@@ -107,15 +109,20 @@ vehicle_license_number = [
 ]
 
 tickets = []
-for i in range(10):
+for i in range(1000):
+    start_timestamp = generate_random_timestamp_2023()
+    end_timestamp = start_timestamp + random.randint(1, 4)
+    time_difference_hours = (end_timestamp - start_timestamp) / 3600
+    amount_paid = time_difference_hours * random.uniform(5, 7)
+
     tickets.append({
         "_id": ObjectId(),
         "user_id": str(user_ids[i % len(user_ids)]),
         "vehicle_license_number": vehicle_license_number[i % len(vehicle_license_number)],
         "parking_spot_id": parking_spot_array[int(i % len(parking_spot_array))]["id"],
-        "issue_timestamp": generate_timestamps()[0],
-        "end_timestamp": generate_timestamps()[1],
-        "amount_paid": 10.0 * (i + 1),
+        "issue_timestamp": start_timestamp,
+        "end_timestamp": end_timestamp,
+        "amount_paid": amount_paid,
         "level": 1,
         "parking_lot_id": str(parking_lot_id),
         "code": f"CODE{i}",
