@@ -180,4 +180,18 @@ impl DB {
 
         Ok(user_balance)
     }
+
+    pub async fn deposit_balance(&self, user_id: &str, amount: f64) -> Result<String> {
+        let user = self.get_user_by_id(user_id).await?;
+        let new_balance = user.account_balance + amount;
+
+        let filter = doc! { "_id": ObjectId::from_str(user_id).unwrap() };
+        let update = doc! { "$set": { "account_balance": new_balance } };
+        self.user_collection
+            .update_one(filter, update, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        Ok("Successful operation".to_string())
+    }
 }

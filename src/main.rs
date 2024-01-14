@@ -23,7 +23,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use handlers::{
     common::handler_404,
     sample::{create_sample_user, root},
-    users::{create_user, get_users, register_user, login_user, get_user_balance}, 
+    users::{create_user, get_users, register_user, login_user, get_user_balance, deposit_balance}, 
     parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code, get_parking, get_parking_lot_levels, get_parking_lot_income},
     vehicle::{create_vehicle, get_vehicles, get_vehicle_by_license_plate_number, get_user_vehicles, create_user_vehicle}, 
     ticket::{get_tickets, create_ticket, put_ticket, get_user_active_tickets, create_user_ticket},
@@ -71,7 +71,7 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/users", get(get_users).post(create_user))
         .route("/user", post(register_user))
         .route("/login", post(login_user))
-        .route("/me/balance", get(get_user_balance))
+        .route("/me/balance", get(get_user_balance).put(deposit_balance))
         .route("/parking-lots", get(get_parkings).post(create_parking))
         .route("/parking-lots/:id/code", get(generate_parking_lot_code))
         .route("/parking-lots/", get(get_parking_by_code))

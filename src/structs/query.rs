@@ -39,3 +39,8 @@ pub struct QueryParkingSpaceCode {
 fn default_level() -> i32 {
     -1
 }
+
+#[derive(Deserialize)]
+pub struct UserBalance {
+    pub balance: f64,
+}
