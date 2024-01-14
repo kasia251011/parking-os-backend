@@ -6,8 +6,8 @@ use futures::StreamExt;
 use crate::structs::{
     error::MyError::{*, self}, 
     model::{Ticket, ParkingSpace},
-    response::TicketResponse, 
-    schema::CreateTicketSchema
+    response::{TicketResponse, TicketUserResponse}, 
+    schema::{CreateTicketSchema, CreateTicketUserSchema}
 };
 
 use super::common::DB;
@@ -236,5 +236,79 @@ impl DB {
         };
 
         Ok(ticket_response)
+    }
+
+    pub async fn get_user_active_tickets(&self, user_id: &str) -> Result<Vec<TicketUserResponse>> {
+        let filter = doc! { 
+            "user_id": user_id,
+            "end_timestamp": 0,
+        };
+        let mut cursor = self
+            .ticket_collection
+            .find(filter, None)
+            .await
+            .map_err(MongoQueryError)?;
+    
+        let mut json_result: Vec<TicketUserResponse> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            json_result.push(self.doc_to_ticket_user(&doc.unwrap())?);
+        }
+    
+        Ok(json_result)
+    }
+
+    fn doc_to_ticket_user(&self, ticket: &Ticket) -> Result<TicketUserResponse> {
+        let ticket_response = TicketUserResponse {
+            vehicle_license_number: ticket.vehicle_license_number.to_owned(),
+            parking_spot_id: ticket.parking_spot_id.to_owned(),
+            issue_timestamp: ticket.issue_timestamp,
+            end_timestamp: ticket.end_timestamp,
+            amount_paid: ticket.amount_paid,
+            level: ticket.level,
+            parking_lot_id: ticket.parking_lot_id.to_owned(),
+            code: ticket.code.to_owned(),
+        };
+
+        Ok(ticket_response)
+    }
+
+    pub async fn create_user_ticket(&self, user_id: &str, body: &CreateTicketUserSchema) -> Result<String> {
+        let parking_lot = self
+            .get_parking_lot_by_id(&body.parking_lot_id)
+            .await?;
+
+        let parking_space = self
+            .get_new_parking_space_by_license_number(&body.vehicle_license_number, &parking_lot.id)
+            .await?;
+
+        println!("parking_space: {:?}", parking_space);
+
+        let ticket_id = ObjectId::new();
+        let ticket = Ticket {
+            _id: ticket_id,
+            user_id: user_id.to_owned(),
+            vehicle_license_number: body.vehicle_license_number.to_owned(),
+            parking_spot_id: parking_space._id.to_hex(),
+            issue_timestamp: chrono::Utc::now().timestamp(),
+            end_timestamp: 0,
+            amount_paid: 0.0,
+            level: parking_space.location.no_level,
+            parking_lot_id: body.parking_lot_id.to_owned(),
+            code: ticket_id.to_hex().chars().take(8).collect(),
+        };
+
+        match self.ticket_collection.insert_one(ticket, None).await {
+            Ok(result) => result,
+            Err(e) => {
+                if e.to_string()
+                    .contains("E110000 duplicate key error collection")
+                {
+                    return Err(MongoDuplicateError(e));
+                }
+                return Err(MongoQueryError(e));
+            }
+        };
+
+        Ok(ticket_id.to_hex().chars().take(8).collect())
     }
 }

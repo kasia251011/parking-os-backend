@@ -1,4 +1,4 @@
-use jsonwebtoken::{decode, encode, Algorithm, EncodingKey, Header, DecodingKey};
+use jsonwebtoken::{encode, Algorithm, EncodingKey, Header, DecodingKey};
 use serde::{Deserialize, Serialize};
 
 use crate::structs::model::Role;
