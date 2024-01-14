@@ -50,6 +50,6 @@ pub async fn login_user(
 {
     match app_state.db.login_user(&body).await.map_err(MyError::from) {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
-        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
+        Err(e) => Err((StatusCode::BAD_REQUEST, "Invalid input ".to_string() + &e.to_string())),
     }
 }

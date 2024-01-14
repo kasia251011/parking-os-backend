@@ -27,6 +27,22 @@ impl DB {
         Ok(json_result)
     }
 
+    pub async fn fetch_user_vehicles(&self, user_id: &str) -> Result<Vec<VehicleResponse>> {
+        let filter = doc! { "user_id": user_id };
+        let mut cursor = self
+            .vehicle_collection
+            .find(filter, None)
+            .await
+            .map_err(MongoQueryError)?;
+    
+        let mut json_result: Vec<VehicleResponse> = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            json_result.push(self.doc_to_vehicle(&doc.unwrap())?);
+        }
+    
+        Ok(json_result)
+    }
+
     pub async fn create_vehicle(&self, body: &CreateVehicleSchema) -> Result<String> {
         let new_vehicle_id = ObjectId::new();
         let vehicle = Vehicle {
