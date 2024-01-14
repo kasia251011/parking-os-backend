@@ -4,7 +4,7 @@ use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
 use crate::AppState;
 use crate::structs::error::MyError;
-use crate::structs::schema::CreateUserSchema;
+use crate::structs::schema::{CreateUserSchema, RegisterUserSchema, LoginUserSchema};
 
 pub async fn get_users(
     State(app_state): State<Arc<AppState>>,
@@ -27,6 +27,28 @@ pub async fn create_user(
 ) -> Result<impl IntoResponse, (StatusCode, String)> 
 {
     match app_state.db.create_user(&body).await.map_err(MyError::from) {
+        Ok(res) => Ok((StatusCode::CREATED, Json(res))),
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
+    }
+}
+
+pub async fn register_user(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<RegisterUserSchema>,
+) -> Result<impl IntoResponse, (StatusCode, String)> 
+{
+    match app_state.db.register_user(&body).await.map_err(MyError::from) {
+        Ok(res) => Ok((StatusCode::CREATED, Json(res))),
+        Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
+    }
+}
+
+pub async fn login_user(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<LoginUserSchema>,
+) -> Result<impl IntoResponse, (StatusCode, String)> 
+{
+    match app_state.db.login_user(&body).await.map_err(MyError::from) {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
         Err(_) => Err((StatusCode::BAD_REQUEST, "Invalid input".to_string())),
     }

@@ -59,3 +59,17 @@ pub struct CreateTariffSchema {
     #[serde(rename = "pricePerHour")]
     pub price_per_hour: f64,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegisterUserSchema {
+    pub name: String,
+    pub surname: String,
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LoginUserSchema {
+    pub email: String,
+    pub password: String,
+}

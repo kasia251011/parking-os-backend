@@ -1,6 +1,7 @@
 mod structs;
 mod handlers;
 mod db;
+mod utils;
 
 use std::{time::Duration, sync::Arc};
 use axum::{
@@ -22,7 +23,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use handlers::{
     common::handler_404,
     sample::{create_sample_user, root},
-    users::{create_user, get_users}, 
+    users::{create_user, get_users, register_user, login_user}, 
     parking_lot::{create_parking, get_parkings, get_parking_by_code, generate_parking_lot_code, get_parking, get_parking_lot_levels, get_parking_lot_income},
     vehicle::{create_vehicle, get_vehicles, get_vehicle_by_license_plate_number}, 
     ticket::{get_tickets, create_ticket, put_ticket},
@@ -68,6 +69,8 @@ pub async fn app(app_state: Arc<AppState>) -> Router {
         .route("/sample/", get(root))
         .route("/sample/users/", post(create_sample_user))
         .route("/users", get(get_users).post(create_user))
+        .route("/user", post(register_user))
+        .route("/login", post(login_user))
         .route("/parking-lots", get(get_parkings).post(create_parking))
         .route("/parking-lots/:id/code", get(generate_parking_lot_code))
         .route("/parking-lots/", get(get_parking_by_code))

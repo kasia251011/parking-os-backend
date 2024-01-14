@@ -23,6 +23,8 @@ mime = "0.3.17"
 http-body-util = "0.1.0"
 thiserror = "1.0.40"
 base64 = "0.21.5"
+bcrypt = "0.15.0"
+jsonwebtoken = "9.2.0"
 
 [dev-dependencies]
 tower = { version = "0.4.13", features = ["util"] }

@@ -2,11 +2,20 @@ use serde::{Deserialize, Serialize};
 use mongodb::bson::oid::ObjectId;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Role {
+    Admin,
+    User,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     pub _id: ObjectId,
     pub name: String,
     pub surname: String,
+    pub email: String,
+    pub password: String,
     pub account_balance: f64,
+    pub role: Role,
     pub blocked: bool,
 }
 

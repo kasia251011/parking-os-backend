@@ -1,14 +1,15 @@
 use std::str::FromStr;
 
+use bcrypt::hash;
 use bson::{oid::ObjectId, doc};
 use futures::StreamExt;
 
-use crate::structs::{
+use crate::{structs::{
     error::MyError::{*, self}, 
-    model::User,
+    model::{User, Role},
     response::UserResponse, 
-    schema::CreateUserSchema
-};
+    schema::{CreateUserSchema, RegisterUserSchema, LoginUserSchema}
+}, utils::jwt};
 
 use super::common::DB;
 
@@ -36,6 +37,9 @@ impl DB {
             name: body.name.to_owned(),
             surname: body.surname.to_owned(),
             account_balance: body.account_balance,
+            email: body.name.to_owned() + "." + &body.surname.to_owned() + "@gmail.com",
+            password: "123".to_string(),
+            role: Role::User,
             blocked: body.blocked,
         };
 
@@ -102,5 +106,68 @@ impl DB {
         };
 
         Ok(user_response)
+    }
+
+    pub async fn register_user(&self, body: &RegisterUserSchema) -> Result<String> {
+        let new_user_id = ObjectId::new();
+        let user = User {
+            _id: new_user_id,
+            name: body.name.to_owned(),
+            surname: body.surname.to_owned(),
+            account_balance: 0.0,
+            email: body.email.to_owned(),
+            password: hash(&body.password, 10).unwrap(),
+            role: Role::User,
+            blocked: false,
+        };
+
+        match self.user_collection.insert_one(user, None).await {
+            Ok(result) => result,
+            Err(e) => {
+                println!("{:?}", e);
+                if e.to_string()
+                    .contains("E110000 duplicate key error collection")
+                {
+                    return Err(MongoDuplicateError(e));
+                }
+                return Err(MongoQueryError(e));
+            }
+        };
+
+        // create jwt token
+        let jwt_user = jwt::User {
+            name: body.name.to_owned(),
+            surname: body.surname.to_owned(),
+            email: body.email.to_owned(),
+            role: Role::User,
+        };
+        let token = jwt::create_token(&new_user_id.to_hex(), jwt_user);
+
+        Ok(token)
+    }
+
+    pub async fn login_user(&self, body: &LoginUserSchema) -> Result<String> {
+        let filter = doc! { "email": body.email.to_owned() };
+        let user = self
+            .user_collection
+            .find_one(filter, None)
+            .await
+            .map_err(MongoQueryError)?
+            .ok_or(MongoNotFound("User not found".to_string()))?;
+
+        if !bcrypt::verify(&body.password, &user.password).unwrap() {
+            return Err(InvalidCredentialsError("Invalid credentials".to_string()));
+        }
+
+        // create jwt token
+        let jwt_user = jwt::User {
+            name: user.name.to_owned(),
+            surname: user.surname.to_owned(),
+            email: user.email.to_owned(),
+            role: user.role.to_owned(),
+        };
+        let token = jwt::create_token(&user._id.to_hex(), jwt_user);
+
+        Ok(token)
     }
 }
