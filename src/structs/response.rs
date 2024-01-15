@@ -55,6 +55,8 @@ pub struct TicketResponse {
     #[serde(rename = "amountPaid")]
     pub amount_paid: f64,
     pub level: u32,
+    #[serde(rename = "spotOrdinalNumber")]
+    pub spot_ordinal_number: i64,
     #[serde(rename = "parkingLotId")]
     pub parking_lot_id: String,
     pub code: String,

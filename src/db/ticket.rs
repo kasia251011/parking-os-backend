@@ -248,6 +248,7 @@ impl DB {
             end_timestamp: ticket.end_timestamp,
             amount_paid: ticket.amount_paid,
             level: ticket.level,
+            spot_ordinal_number: ticket.spot_ordinal_number as i64,
             parking_lot_id: ticket.parking_lot_id.to_owned(),
             code: ticket.code.to_owned(),
         };
