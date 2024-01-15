@@ -188,11 +188,11 @@ for i in range(1000):
         "issue_timestamp": start_timestamp,
         "end_timestamp": end_timestamp,
         "amount_paid": amount_paid,
-        "level": 1,
+        "level": parking_spot_array[int(i % len(parking_spot_array))]["level"],
+        "spot_ordinal_number": parking_spot_array[int(i % len(parking_spot_array))]["ordinalNumber"],
         "parking_lot_id": str(parking_lot_id),
         "code": f"CODE{i}",
     })
-    print("Tickets: " + str(tickets[i]))
 
 # Add the generated tickets to the "ticket" collection
 db["ticket"].insert_many(tickets)
