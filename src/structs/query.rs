@@ -20,9 +20,9 @@ pub struct QueryTicket {
     pub vehicle_license_number: String,
     #[serde(rename = "spotOrdinalNumber", default)]
     pub spot_ordinal_number: u32,
-    #[serde(rename = "issueTimeStamp", default)]
+    #[serde(rename = "issueTimestamp", default)]
     pub issue_time_stamp: u32,
-    #[serde(rename = "endTimeStamp", default)]
+    #[serde(rename = "endTimestamp", default)]
     pub end_time_stamp: u32,
     #[serde(default)]
     pub level: u32,
