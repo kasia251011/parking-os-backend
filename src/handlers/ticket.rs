@@ -16,6 +16,7 @@ pub async fn get_tickets(
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> 
 {
+    println!("user_id: {}\n active: {}\n vehicle_license_number: {}\n parking_spot_id: {}\n issue_time_stamp: {}\n end_time_stamp: {}\n level: {}\n parkingLotId: {}\n", user_id, active, vehicle_license_number, parking_spot_id, issue_time_stamp, end_time_stamp, level, parking_lot_id);
     match app_state
         .db
         .fetch_tickets(&user_id, active, &vehicle_license_number, &parking_spot_id, issue_time_stamp, end_time_stamp, level, &parking_lot_id)

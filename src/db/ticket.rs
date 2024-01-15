@@ -63,6 +63,8 @@ impl DB {
         } else {
             doc! { "$eq": parking_lot_id }
         };
+
+        println!("{}", parking_lot_id_query);
     
         let filter = doc! {
             "user_id": user_id_query,
