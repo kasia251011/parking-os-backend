@@ -16,7 +16,7 @@ use super::common::DB;
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn fetch_tickets(&self, user_id: &str, active: bool, vehicle_license_number: &str, parking_spot_id: &str, 
+    pub async fn fetch_tickets(&self, user_id: &str, active: bool, vehicle_license_number: &str, spot_ordinal_number: u32, 
         issue_time_stamp: u32, end_time_stamp: u32, level: u32, parking_lot_id: &str
     ) -> Result<Vec<TicketResponse>> {
         let user_id_query = if user_id.is_empty() {
@@ -31,10 +31,10 @@ impl DB {
             doc! { "$regex": &vehicle_license_number, "$options": "i" }
         };
 
-        let parking_spot_id_query = if parking_spot_id.is_empty() {
+        let spot_ordinal_number_query = if spot_ordinal_number == 0 {
             doc! { "$ne": "" }
         } else {
-            doc! { "$eq": parking_spot_id }
+            doc! { "$eq": spot_ordinal_number }
         };
 
         let start_of_day = Utc.timestamp(issue_time_stamp.into(), 0).date().and_hms(0, 0, 0);
@@ -83,7 +83,7 @@ impl DB {
         let filter = doc! {
             "user_id": user_id_query,
             "vehicle_license_number": vehicle_license_number_query,
-            "parking_spot_id": parking_spot_id_query,
+            "spot_ordinal_number": spot_ordinal_number_query,
             "issue_timestamp": issue_timestamp_query,
             "end_timestamp": end_timestamp_query,
             "level": level_query,
@@ -120,6 +120,7 @@ impl DB {
             user_id: body.user_id.to_owned(),
             vehicle_license_number: body.vehicle_license_number.to_owned(),
             parking_spot_id: parking_space._id.to_hex(),
+            spot_ordinal_number: parking_space.location.no_space,
             issue_timestamp: chrono::Utc::now().timestamp(),
             end_timestamp: 0,
             amount_paid: 0.0,
@@ -312,6 +313,7 @@ impl DB {
             end_timestamp: 0,
             amount_paid: 0.0,
             level: parking_space.location.no_level,
+            spot_ordinal_number: parking_space.location.no_space,
             parking_lot_id: body.parking_lot_id.to_owned(),
             code: ticket_id.to_hex().chars().take(8).collect(),
         };

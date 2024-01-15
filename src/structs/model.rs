@@ -29,6 +29,7 @@ pub struct Ticket {
     pub end_timestamp: i64,
     pub amount_paid: f64,
     pub level: u32,
+    pub spot_ordinal_number: u32,
     pub parking_lot_id: String,
     pub code: String,
 }
