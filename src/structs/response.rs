@@ -7,6 +7,7 @@ pub struct UserResponse {
     pub id: String,
     pub name: String,
     pub surname: String,
+    pub email: String,
     #[serde(rename = "accountBalance")]
     pub account_balance: f64,
     pub blocked: bool,

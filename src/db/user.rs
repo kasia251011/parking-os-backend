@@ -72,7 +72,7 @@ impl DB {
 
     pub async fn transfer_balance(&self, user_id: &str, amount: f64) -> Result<String> {
         let user = self.get_user_by_id(user_id).await?;
-        let admin = self.get_user_by_id("6581ca3eee6bbb6e8aca7fc4").await?;
+        let admin = self.get_user_by_id("5f9b3b9b9d9b9d9b9d9b9d9b").await?;
         let new_balance_admin = admin.account_balance + amount;
         let new_balance = match user.account_balance - amount {
             x if x < 0.0 => return Err(NotEnoughBalanceError("Not enough balance".to_string())),
@@ -86,7 +86,7 @@ impl DB {
             .await
             .map_err(MongoQueryError)?;
 
-        let filter = doc! { "_id": ObjectId::from_str("6581ca3eee6bbb6e8aca7fc4").unwrap() };
+        let filter = doc! { "_id": ObjectId::from_str("5f9b3b9b9d9b9d9b9d9b9d9b").unwrap() };
         let update = doc! { "$set": { "account_balance": new_balance_admin } };
         self.user_collection
             .update_one(filter, update, None)
@@ -101,6 +101,7 @@ impl DB {
             id: user._id.to_hex(),
             name: user.name.to_owned(),
             surname: user.surname.to_owned(),
+            email: user.email.to_owned(),
             account_balance: user.account_balance.to_owned(),
             blocked: user.blocked.to_owned(),
         };

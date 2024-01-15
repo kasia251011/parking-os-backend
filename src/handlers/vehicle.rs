@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use axum::body::Body;
 use axum::extract::Path;
-use axum::http::{Request, HeaderMap};
+use axum::http::HeaderMap;
 use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
 use crate::AppState;
