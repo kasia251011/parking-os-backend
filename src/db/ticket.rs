@@ -248,7 +248,7 @@ impl DB {
             end_timestamp: ticket.end_timestamp,
             amount_paid: ticket.amount_paid,
             level: ticket.level,
-            spot_ordinal_number: ticket.spot_ordinal_number as i64,
+            spot_ordinal_number: ticket.spot_ordinal_number,
             parking_lot_id: ticket.parking_lot_id.to_owned(),
             code: ticket.code.to_owned(),
         };
@@ -283,7 +283,7 @@ impl DB {
 
         let ticket_response = TicketUserResponse {
             vehicle_license_number: ticket.vehicle_license_number.to_owned(),
-            spot_ordinal_number: spot_oridinal_number as i64,
+            spot_ordinal_number: spot_oridinal_number,
             issue_timestamp: ticket.issue_timestamp,
             level: ticket.level,
             parking_lot_id: ticket.parking_lot_id.to_owned(),
