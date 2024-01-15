@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::extract::Query;
+use axum::extract::{Query, Path};
 use axum::http::HeaderMap;
 use axum::{response::IntoResponse, http::StatusCode, extract::State, Json};
 
@@ -108,5 +108,16 @@ pub async fn deposit_balance(
     {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
         Err(_) => Err((StatusCode::NOT_FOUND, "User not found".to_string())),
+    }
+}
+
+pub async fn block_user(
+    Path(user_id): Path<String>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, String)> 
+{
+    match app_state.db.block_user(&user_id).await.map_err(MyError::from) {
+        Ok(res) => Ok((StatusCode::CREATED, Json(res))),
+        Err(_) => Err((StatusCode::NOT_FOUND, "Incorrect data".to_string())),
     }
 }

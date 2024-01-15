@@ -195,4 +195,18 @@ impl DB {
 
         Ok("Successful operation".to_string())
     }
+
+    pub async fn block_user(&self, user_id: &str) -> Result<String> {
+        let filter = doc! { "_id": ObjectId::from_str(user_id).unwrap() };
+        // toggle blocked
+        let user = self.get_user_by_id(user_id).await?;
+        let new_blocked = !user.blocked;
+        let update = doc! { "$set": { "blocked": new_blocked } };
+        self.user_collection
+            .update_one(filter, update, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        Ok("Successful operation".to_string())
+    }
 }

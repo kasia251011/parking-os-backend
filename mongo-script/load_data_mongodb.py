@@ -86,6 +86,26 @@ db["user"].insert_many([
         "email": "jan.nowak@example.com",
         "password": "$2a$10$VfvVXxOo39T5zsJCfCXQ4uktwn9KF5OVvgZBSg/6458MuHRHqzZ9C", # test123
         "role": "User"
+    },
+    {
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9da0"),
+        "name": "Paweł",
+        "surname": "Kowalski",
+        "account_balance": 5000,
+        "blocked": True,
+        "email": "pawel.kowalski@example.com",
+        "password": "$2a$10$Z9/xJYUZFPcS54UuAETIGu4RFsskaOEel9NOjL1kysrMyKp0cvjUm", # hello123
+        "role": "User"
+    },
+    {
+        "_id": ObjectId("5f9b3b9b9d9b9d9b9d9b9da1"),
+        "name": "Grzegorz",
+        "surname": "Witkiewicz",
+        "account_balance": 6000,
+        "blocked": True,
+        "email": "grzegorz.witkiewicz@example.com",
+        "password": "$2a$10$jC6LzGqaX9RM32QdZj.hMeqcUtbnnZPBNkTRSfVH9oOHlax1ufkXu", # grze123
+        "role": "User"
     }
 ])
 
