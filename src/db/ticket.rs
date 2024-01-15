@@ -83,10 +83,10 @@ impl DB {
         let filter = doc! {
             "user_id": user_id_query,
             "vehicle_license_number": vehicle_license_number_query,
-            "spot_ordinal_number": spot_ordinal_number_query,
             "issue_timestamp": issue_timestamp_query,
             "end_timestamp": end_timestamp_query,
             "level": level_query,
+            "spot_ordinal_number": spot_ordinal_number_query,
             "parking_lot_id": parking_lot_id_query,
         };
         let mut cursor = self

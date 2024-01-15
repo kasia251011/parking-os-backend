@@ -189,7 +189,7 @@ for i in range(1000):
         "end_timestamp": end_timestamp,
         "amount_paid": amount_paid,
         "level": parking_spot_array[int(i % len(parking_spot_array))]["level"],
-        "spot_ordinal_number": parking_spot_array[int(i % len(parking_spot_array))]["ordinalNumber"],
+        "spot_ordinal_number": random.randint(0, 4),
         "parking_lot_id": str(parking_lot_id),
         "code": f"CODE{i}",
     })

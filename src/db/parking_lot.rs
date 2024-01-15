@@ -209,9 +209,9 @@ impl DB {
             .await
             .map_err(MongoQueryError)?;
 
-        println!("cursor: {:?}", cursor.next().await);
         let mut json_result: Vec<IncomeStats> = Vec::new();
         while let Some(doc) = cursor.next().await {
+            println!("doc: {:?}", doc);
             let ticket: Ticket = doc.unwrap();
             let issue_timestamp = chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap();
             let date_time = Utc.from_utc_datetime(&issue_timestamp).month();
