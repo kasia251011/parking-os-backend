@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -176,9 +176,9 @@ vehicle_license_number = [
 tickets = []
 for i in range(1000):
     start_timestamp = generate_random_timestamp_2023()
-    end_timestamp = start_timestamp + random.randint(1, 4)
+    end_timestamp = start_timestamp + int(timedelta(hours=random.randint(1, 10)).total_seconds())
     time_difference_hours = (end_timestamp - start_timestamp) / 3600
-    amount_paid = time_difference_hours * random.uniform(5, 7)
+    amount_paid = round(time_difference_hours * random.uniform(5, 7))
 
     tickets.append({
         "_id": ObjectId(),
