@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use bson::{oid::ObjectId, doc};
+use chrono::{Utc, TimeZone};
 use futures::StreamExt;
 
 use crate::structs::{
@@ -27,7 +28,7 @@ impl DB {
         let vehicle_license_number_query = if vehicle_license_number.is_empty() {
             doc! { "$ne": "" }
         } else {
-            doc! { "$eq": vehicle_license_number }
+            doc! { "$regex": &vehicle_license_number, "$options": "i" }
         };
 
         let parking_spot_id_query = if parking_spot_id.is_empty() {
@@ -36,19 +37,32 @@ impl DB {
             doc! { "$eq": parking_spot_id }
         };
 
-        let issue_time_stamp_query = if issue_time_stamp == 0 {
+        let start_of_day = Utc.timestamp(issue_time_stamp.into(), 0).date().and_hms(0, 0, 0);
+        let end_of_day = Utc.timestamp(issue_time_stamp.into(), 0).date().and_hms(23, 59, 59);
+        
+        println!("start_of_day: {} end_of_day: {}", start_of_day.timestamp(), end_of_day.timestamp());
+        let issue_timestamp_query = if issue_time_stamp == 0 {
             doc! { "$ne": 0 }
         } else {
-            doc! { "$eq": issue_time_stamp }
+            doc! {
+                "$gte": start_of_day.timestamp(),
+                "$lte": end_of_day.timestamp()
+            }
         };
     
+        let start_of_day = Utc.timestamp(end_time_stamp.into(), 0).date().and_hms(0, 0, 0);
+        let end_of_day = Utc.timestamp(end_time_stamp.into(), 0).date().and_hms(23, 59, 59);
+
         let end_timestamp_query = if active {
             doc! { "$eq": 0 }
         } else {
             if end_time_stamp == 0 {
                 doc! { "$ne": 0 }
             } else {
-                doc! { "$eq": end_time_stamp }
+                doc! {
+                    "$gte": start_of_day.timestamp(),
+                    "$lte": end_of_day.timestamp()
+                }
             }
         };
 
@@ -70,7 +84,7 @@ impl DB {
             "user_id": user_id_query,
             "vehicle_license_number": vehicle_license_number_query,
             "parking_spot_id": parking_spot_id_query,
-            "issue_timestamp": issue_time_stamp_query,
+            "issue_timestamp": issue_timestamp_query,
             "end_timestamp": end_timestamp_query,
             "level": level_query,
             "parking_lot_id": parking_lot_id_query,
