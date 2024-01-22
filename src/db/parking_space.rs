@@ -1,13 +1,14 @@
 use std::str::FromStr;
 
-use bson::{oid::ObjectId, doc};
-use chrono::{Datelike, DateTime, TimeZone, Utc};
+use bson::{doc, oid::ObjectId};
+use chrono::{DateTime, Datelike, TimeZone, Utc};
 use futures::StreamExt;
 
 use crate::structs::{
-    error::MyError::{*, self}, 
-    model::{ParkingSpace, VehicleType, Ticket}, 
-    schema::CreateParkingSpaceSchema, response::{ParkingSpaceResponse, IncomeStatsResponse, IncomeStats},
+    error::MyError::{self, *},
+    model::{ParkingSpace, Ticket, VehicleType},
+    response::{IncomeStats, IncomeStatsResponse, ParkingSpaceResponse},
+    schema::CreateParkingSpaceSchema,
 };
 
 use super::common::DB;
@@ -30,7 +31,10 @@ impl DB {
         Ok(json_result)
     }
 
-    pub async fn create_parking_space(&self, parking_space: &CreateParkingSpaceSchema) -> Result<String> {
+    pub async fn create_parking_space(
+        &self,
+        parking_space: &CreateParkingSpaceSchema,
+    ) -> Result<String> {
         let new_parking_space_id = ObjectId::new();
         let parking_space = ParkingSpace {
             _id: new_parking_space_id,
@@ -41,7 +45,11 @@ impl DB {
             price_modifier: 1.0,
         };
 
-        match self.parking_space_collection.insert_one(parking_space, None).await {
+        match self
+            .parking_space_collection
+            .insert_one(parking_space, None)
+            .await
+        {
             Ok(result) => result,
             Err(e) => {
                 if e.to_string()
@@ -56,7 +64,11 @@ impl DB {
         Ok("Successful operation".to_string())
     }
 
-    pub async fn get_new_parking_space_by_license_number(&self, licence_number: &str, parking_lot_id: &str) -> Result<ParkingSpace> {
+    pub async fn get_new_parking_space_by_license_number(
+        &self,
+        licence_number: &str,
+        parking_lot_id: &str,
+    ) -> Result<ParkingSpace> {
         let vehicle_type: &str = match licence_number.as_bytes()[0] {
             b'A' => "Truck",
             _ => "Car",
@@ -85,7 +97,8 @@ impl DB {
             return Err(NoParkingSpaceError(licence_number.to_owned()));
         }
 
-        self.toggle_occupied_parking_space(&json_result[0]._id.to_hex()).await?;
+        self.toggle_occupied_parking_space(&json_result[0]._id.to_hex())
+            .await?;
 
         println!("json_result: {:?}", json_result[0]);
 
@@ -93,7 +106,8 @@ impl DB {
     }
 
     pub async fn toggle_occupied_parking_space(&self, parking_space_id: &str) -> Result<String> {
-        let oid = ObjectId::from_str(parking_space_id).map_err(|_| InvalidIDError(parking_space_id.to_owned()))?;
+        let oid = ObjectId::from_str(parking_space_id)
+            .map_err(|_| InvalidIDError(parking_space_id.to_owned()))?;
 
         let parking_space = match self
             .parking_space_collection
@@ -104,15 +118,19 @@ impl DB {
                 None,
             )
             .await
-            .map_err(MongoQueryError)? 
+            .map_err(MongoQueryError)?
         {
             Some(parking_space) => Some(parking_space),
-            None => return Err(NotFoundError(format!("parking_space with id: {}", parking_space_id))),
+            None => {
+                return Err(NotFoundError(format!(
+                    "parking_space with id: {}",
+                    parking_space_id
+                )))
+            }
         };
 
         let mut parking_space = parking_space.unwrap();
         parking_space.occupied = !parking_space.occupied;
-
 
         self.parking_space_collection
             .update_one(
@@ -132,26 +150,44 @@ impl DB {
         Ok("Successful operation".to_string())
     }
 
-    pub async fn get_parking_space_by_parking_spot_id(&self, parking_lot_id: &str, parking_space_id: &str) -> Result<ParkingSpace> {
+    pub async fn get_parking_space_by_parking_spot_id(
+        &self,
+        parking_lot_id: &str,
+        parking_space_id: &str,
+    ) -> Result<ParkingSpace> {
         let parking_space = self
             .fetch_parking_spaces()
             .await?
             .into_iter()
             .find(|parking_space| {
-                parking_space.parking_lot_id == ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned())).unwrap()
-                    && parking_space._id == ObjectId::from_str(parking_space_id).map_err(|_| InvalidIDError(parking_space_id.to_owned())).unwrap()
+                parking_space.parking_lot_id
+                    == ObjectId::from_str(parking_lot_id)
+                        .map_err(|_| InvalidIDError(parking_lot_id.to_owned()))
+                        .unwrap()
+                    && parking_space._id
+                        == ObjectId::from_str(parking_space_id)
+                            .map_err(|_| InvalidIDError(parking_space_id.to_owned()))
+                            .unwrap()
             });
 
         println!("parking_space: {:?}", parking_space);
 
         match parking_space {
             Some(parking_space) => Ok(parking_space),
-            None => Err(NotFoundError(format!("parking_space with id: {}", parking_space_id))),
+            None => Err(NotFoundError(format!(
+                "parking_space with id: {}",
+                parking_space_id
+            ))),
         }
     }
 
-    pub async fn get_parking_spaces_by_parking_lot_id(&self, parking_lot_id: &str, level: i32) -> Result<Vec<ParkingSpaceResponse>> {
-        let parking_lot_id = ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?;
+    pub async fn get_parking_spaces_by_parking_lot_id(
+        &self,
+        parking_lot_id: &str,
+        level: i32,
+    ) -> Result<Vec<ParkingSpaceResponse>> {
+        let parking_lot_id = ObjectId::from_str(parking_lot_id)
+            .map_err(|_| InvalidIDError(parking_lot_id.to_owned()))?;
         let query = match level {
             -1 => doc! {
                 "parking_lot_id": parking_lot_id,
@@ -164,10 +200,7 @@ impl DB {
 
         let mut cursor = self
             .parking_space_collection
-            .find(
-                query,
-                None,
-            )
+            .find(query, None)
             .await
             .map_err(MongoQueryError)?;
 
@@ -190,19 +223,34 @@ impl DB {
         Ok(json_result)
     }
 
-    pub async fn get_parking_space_income(&self, parking_lot_id: &str, parking_space_id: &str) -> Result<IncomeStatsResponse> {
+    pub async fn get_parking_space_income(
+        &self,
+        parking_lot_id: &str,
+        parking_space_id: &str,
+    ) -> Result<IncomeStatsResponse> {
         let parking_space = self
             .fetch_parking_spaces()
             .await?
             .into_iter()
             .find(|parking_space| {
-                parking_space.parking_lot_id == ObjectId::from_str(parking_lot_id).map_err(|_| InvalidIDError(parking_lot_id.to_owned())).unwrap()
-                    && parking_space._id == ObjectId::from_str(parking_space_id).map_err(|_| InvalidIDError(parking_space_id.to_owned())).unwrap()
+                parking_space.parking_lot_id
+                    == ObjectId::from_str(parking_lot_id)
+                        .map_err(|_| InvalidIDError(parking_lot_id.to_owned()))
+                        .unwrap()
+                    && parking_space._id
+                        == ObjectId::from_str(parking_space_id)
+                            .map_err(|_| InvalidIDError(parking_space_id.to_owned()))
+                            .unwrap()
             });
 
         let parking_space = match parking_space {
             Some(parking_space) => parking_space,
-            None => return Err(NotFoundError(format!("parking_space with id: {}", parking_space_id))),
+            None => {
+                return Err(NotFoundError(format!(
+                    "parking_space with id: {}",
+                    parking_space_id
+                )))
+            }
         };
 
         let mut cursor = self
@@ -223,7 +271,8 @@ impl DB {
         let mut json_result: Vec<IncomeStats> = Vec::new();
         while let Some(doc) = cursor.next().await {
             let ticket: Ticket = doc.unwrap();
-            let issue_timestamp = chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap();
+            let issue_timestamp =
+                chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap();
             let date_time = Utc.from_utc_datetime(&issue_timestamp).month();
             let month = match date_time {
                 1 => "January",
@@ -238,36 +287,46 @@ impl DB {
                 10 => "October",
                 11 => "November",
                 _ => "December",
-            }.to_string();
+            }
+            .to_string();
 
             let income = ticket.amount_paid;
             if let Some(stats) = json_result.iter_mut().find(|stats| stats.month == month) {
                 stats.income += income;
             } else {
-                json_result.push(IncomeStats {
-                    month,
-                    income,
-                });
+                json_result.push(IncomeStats { month, income });
             }
         }
         println!("json_result: {:?}", json_result);
 
         let mut today_income = 0.0;
         let mut now_income = 0.0;
-        let today_date_time = Utc::now();  
+        let today_date_time = chrono::Utc::now().timestamp();
         while let Some(doc) = cursor.next().await {
             let ticket: Ticket = doc.unwrap();
-            let end_timestamp = DateTime::<Utc>::from_utc(chrono::NaiveDateTime::from_timestamp_opt(ticket.issue_timestamp, 0).unwrap(), Utc);
-            let diff = today_date_time.signed_duration_since(end_timestamp);
-            let days = diff.num_days();
 
-            if days == 0 && days/30 == 0 && days/365 == 0 {
-                let amount_paid = ticket.amount_paid;
-                if ticket.end_timestamp == 0 {
-                    now_income += amount_paid;
+            let tariffs = self
+                .get_tariffs_by_parking_lot_id_ascending(&ticket.parking_lot_id)
+                .await?;
+
+            let total_time = (today_date_time - ticket.issue_timestamp) / 36000 + 1;
+
+            let mut amount_paid = 0.0;
+            while let Some(tariff) = tariffs.iter().next() {
+                if total_time >= tariff.min_time && total_time <= tariff.max_time {
+                    amount_paid = parking_space.price_modifier * tariff.price_per_hour * total_time as f64;
+                    break;
                 }
+            }
+    
+            if amount_paid == 0.0 {
+                amount_paid = parking_space.price_modifier * tariffs.last().unwrap().price_per_hour * total_time as f64;
+            }
 
-                today_income += amount_paid;
+            today_income += amount_paid;
+
+            if ticket.end_timestamp == 0 {
+                now_income += amount_paid;
             }
         }
 
